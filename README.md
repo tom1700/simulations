@@ -1,1 +1,1 @@
-The App available under https://tom1700.github.io/simulations/out/
+The App available under https://tom1700.github.io/simulations
