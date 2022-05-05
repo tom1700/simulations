@@ -15,7 +15,7 @@ const Home: NextPage = () => {
       </Typography>
 
       <Typography variant="subtitle1">
-        Just a bunch of simulations I've made for educational purposes. I
+        Just a bunch of simulations I&apos;ve made for educational purposes. I
         suggest using desktop for optimal experience.
       </Typography>
 
