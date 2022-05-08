@@ -32,18 +32,30 @@ export class Grid3D {
 
         this.neighbourFunctionMap = {
             [Direction.TOP]: (x: number, y: number, z: number) =>
-                to1D(x, y + 1, z, width, height),
+                this.isYWithinBounds(y + 1) ? to1D(x, y + 1, z, width, height) : -1,
             [Direction.BOTTOM]: (x: number, y: number, z: number) =>
-                to1D(x, y - 1, z, width, height),
+                this.isYWithinBounds(y - 1) ? to1D(x, y - 1, z, width, height) : -1,
             [Direction.BACK]: (x: number, y: number, z: number) =>
-                to1D(x, y, z - 1, width, height),
+                this.isZWithinBounds(z - 1) ? to1D(x, y, z - 1, width, height) : -1,
             [Direction.FRONT]: (x: number, y: number, z: number) =>
-                to1D(x, y, z + 1, width, height),
+                this.isZWithinBounds(z + 1) ? to1D(x, y, z + 1, width, height) : -1,
             [Direction.LEFT]: (x: number, y: number, z: number) =>
-                to1D(x - 1, y, z, width, height),
+                this.isXWithinBounds(x - 1) ? to1D(x - 1, y, z, width, height) : -1,
             [Direction.RIGHT]: (x: number, y: number, z: number) =>
-                to1D(x + 1, y, z, width, height),
+                this.isXWithinBounds(x + 1) ? to1D(x + 1, y, z, width, height) : -1,
         }
+    }
+
+    private isYWithinBounds(y: number) {
+        return y > 0 && y < this.height;
+    }
+
+    private isXWithinBounds(x: number) {
+        return x > 0 && x < this.width;
+    }
+
+    private isZWithinBounds(z: number) {
+        return z > 0 && z < this.depth;
     }
 
     public resetBuffer() {
@@ -61,7 +73,9 @@ export class Grid3D {
         const index = this.getNeighbourIndex(direction, x, y, z);
 
         if (index < 0 || index > buffer.length) return false;
-
+        if (x === 0 && y === 1 && z === 0) {
+            console.log(direction, x, y, z, to3D(index, this.width, this.height), buffer[index])
+        }
         return !!buffer[index];
     }
 

@@ -18,7 +18,7 @@ export const populateGridWithFlatNoise = (
             noiseStrengthReduction
         );
         let position = value;
-        console.log(value);
+        
         while (position >= 0) {
           grid.setValue(x, position, z, "true");
           position -= 1;
