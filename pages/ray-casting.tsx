@@ -138,16 +138,15 @@ const CubeWithNoise: NextPage = () => {
         <title>Simulations</title>
         <meta
           name="description"
-          content="Cube based on noise with optimized mesh"
+          content=" Ray casting with no reflections"
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Typography variant="h3" component="h1">
-        Cube based on noise with optimized mesh
+        Ray casting with no reflections
       </Typography>
       <div style={{ display: "flex", justifyContent: "space-between" }}>
         <Link href={"/optimize-mesh"}>{"< Optimize Mesh"}</Link>
-        <Link href={"/ray-casting"}>{"Ray casting >"}</Link>
       </div>
 
       <Stack spacing={2} direction="row" style={{ flex: 1 }}>
