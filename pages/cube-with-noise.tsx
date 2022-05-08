@@ -6,7 +6,10 @@ import Button from "@mui/material/Button";
 import { useCallback, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { Grid3D } from "../data-structures/grid-3d";
 import Link from "next/link";
+import Input from "@mui/material/Input";
+import { populateGridWithFlatNoise } from "../noise/simplex";
 
 function resolutionLabelFormat(value: number) {
   return value;
@@ -19,10 +22,31 @@ function calculateResolutionValue(value: number) {
 class Renderer3D {
   private shouldStop = false;
 
+  private initializeGrid(
+    size: number,
+    resolution: number,
+    seed: string,
+    smoothness: number,
+    noiseStrengthReduction: number
+  ) {
+    const grid = new Grid3D(
+      size / resolution,
+      size / resolution,
+      size / resolution
+    );
+
+    populateGridWithFlatNoise(grid, seed, smoothness, noiseStrengthReduction);
+
+    return grid;
+  }
+
   startAnimation(
     canvasElement: HTMLDivElement,
     size: number,
-    resolution: number
+    resolution: number,
+    seed: string,
+    smoothness: number,
+    noiseStrengthReduction: number
   ) {
     const width = canvasElement.clientWidth;
     const height = canvasElement.clientHeight;
@@ -30,7 +54,7 @@ class Renderer3D {
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
 
     const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
-    const meshMaterial = new THREE.MeshBasicMaterial({ color: 0xdd0000 });
+
     new OrbitControls(camera, canvasElement);
 
     camera.position.z = size * 3;
@@ -42,17 +66,22 @@ class Renderer3D {
     const geometry = new THREE.BoxGeometry(resolution, resolution, resolution);
     const edges = new THREE.EdgesGeometry(geometry);
 
-    for (let x = 0; x < size / resolution; x += 1) {
-      for (let y = 0; y < size / resolution; y += 1) {
-        for (let z = 0; z < size / resolution; z += 1) {
-          const cubeLines = new THREE.LineSegments(edges, lineMaterial);
-          cubeLines.position.x = x * resolution - size / 2;
-          cubeLines.position.y = y * resolution - size / 2;
-          cubeLines.position.z = z * resolution - size / 2;
-          scene.add(cubeLines);
-        }
-      }
-    }
+    const grid = this.initializeGrid(
+      size,
+      resolution,
+      seed,
+      smoothness,
+      noiseStrengthReduction
+    );
+
+    grid.forEach((value, x, y, z) => {
+      if (!value) return;
+      const cubeLines = new THREE.LineSegments(edges, lineMaterial);
+      cubeLines.position.x = x * resolution - size / 2;
+      cubeLines.position.y = y * resolution;
+      cubeLines.position.z = z * resolution - size / 2;
+      scene.add(cubeLines);
+    });
 
     const animate = () => {
       if (this.shouldStop) {
@@ -70,9 +99,12 @@ class Renderer3D {
   }
 }
 
-const NaiveCube: NextPage = () => {
+const CubeWithNoise: NextPage = () => {
   const [size, setSize] = useState(10);
+  const [smoothness, setSmoothness] = useState(1);
   const [resolution, setResolution] = useState(8);
+  const [noiseStrengthReduction, setNoiseStrengthReduction] = useState(1);
+  const [seed, setSeed] = useState("John");
   const renderer3D = useRef<Renderer3D>();
   const canvas = useRef<HTMLDivElement>(null);
 
@@ -85,9 +117,12 @@ const NaiveCube: NextPage = () => {
     renderer3D.current.startAnimation(
       canvas.current,
       size,
-      calculateResolutionValue(resolution)
+      calculateResolutionValue(resolution),
+      seed,
+      smoothness,
+      noiseStrengthReduction
     );
-  }, [resolution, size]);
+  }, [noiseStrengthReduction, resolution, seed, size, smoothness]);
 
   return (
     <Container
@@ -101,15 +136,15 @@ const NaiveCube: NextPage = () => {
     >
       <Head>
         <title>Simulations</title>
-        <meta name="description" content="Dynamic Cube Naive implementation" />
+        <meta name="description" content="Cube based on noise" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Typography variant="h3" component="h1">
-        Dynamic Cube Naive implementation
+        Cube based on noise
       </Typography>
       <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <Link href={"/"}>{"< Home"}</Link>
-        <Link href={"/cube-with-noise"}>{"Cube With Noise >"}</Link>
+        <Link href={"/naive-cube"}>{"< Naive Cube"}</Link>
+        <Link href={"/optimize-mesh"}>{"Optimize Mesh >"}</Link>
       </div>
 
       <Stack spacing={2} direction="row" style={{ flex: 1 }}>
@@ -136,8 +171,30 @@ const NaiveCube: NextPage = () => {
               !Array.isArray(value) && setResolution(value)
             }
           />
-          Total Grid Size:{" "}
+          Total Grid Size: <br />
           {Math.pow(size / calculateResolutionValue(resolution), 3)}
+          Seed:{" "}
+          <Input value={seed} onChange={(ev) => setSeed(ev.target.value)} />
+          Smoothness:
+          <Slider
+            min={1}
+            max={20}
+            step={1}
+            value={smoothness}
+            onChange={(_, value) =>
+              !Array.isArray(value) && setSmoothness(value)
+            }
+          />
+          Noise strength reduction: {noiseStrengthReduction}
+          <Slider
+            min={1}
+            max={5}
+            step={0.25}
+            value={noiseStrengthReduction}
+            onChange={(_, value) =>
+              !Array.isArray(value) && setNoiseStrengthReduction(value)
+            }
+          />
           <Button onClick={createCube}>Create</Button>
         </Stack>
       </Stack>
@@ -145,4 +202,4 @@ const NaiveCube: NextPage = () => {
   );
 };
 
-export default NaiveCube;
+export default CubeWithNoise;

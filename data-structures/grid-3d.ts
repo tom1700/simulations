@@ -89,4 +89,11 @@ export class Grid3D {
     public get depth() {
         return this._depth;
     }
+
+    public forEach(callback: (value: string, x: number, y: number, z: number) => void) {
+        this.buffer.forEach((value, index) => {
+            const { x, y, z } = to3D(index, this.width, this.height);
+            return callback(value, x, y, z)
+        })
+    }
 }
