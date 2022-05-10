@@ -21,10 +21,9 @@ const fibonacciSphere = (samples: number) => {
     return points;
 }
 
-const castRay = (lightSourcePosition: Vector, ray: Vector, grid: Grid3D, eye: EyeMonochrome) => {
-    const currentPosition = lightSourcePosition.clone();
-    const newPosition = lightSourcePosition.clone();
-    const incrementVector = ray.multiply(0.1);
+const castRay = (ray: RayMonochrome, grid: Grid3D, eye: EyeMonochrome) => {
+    const newPosition = ray.startPosition.clone();
+    const incrementVector = ray.direction.multiply(0.1);
 
     while (true) {
         newPosition.addMutate(incrementVector);
@@ -40,22 +39,22 @@ const castRay = (lightSourcePosition: Vector, ray: Vector, grid: Grid3D, eye: Ey
         }
         
         if (value === 'eye') {
-            console.log('eye')
-            const collisionRay = new RayMonochrome(incrementVector.clone(), currentPosition.clone(), 255);
+            const collisionRay = new RayMonochrome(incrementVector.clone(), ray.startPosition.clone(), 255);
 
             eye.updateByRay(collisionRay)
         }
 
         if (value === 'ground') return;
 
-        currentPosition.copyMutate(newPosition);
+        ray.startPosition.copyMutate(newPosition);
     }
 }
 
 export const castRays = (grid: Grid3D, eye: EyeMonochrome, lightSourcePosition: Vector, raysAmount: number) => {
-    const rays = fibonacciSphere(raysAmount);
+    const directions = fibonacciSphere(raysAmount);
 
-    rays.forEach((ray) => {
-        castRay(lightSourcePosition, ray, grid, eye);
+    directions.forEach((direction) => {
+        const ray = new RayMonochrome(direction, lightSourcePosition.clone(), 255);
+        castRay(ray, grid, eye);
     })
 }
