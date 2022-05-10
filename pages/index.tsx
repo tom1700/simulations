@@ -24,7 +24,7 @@ const Home: NextPage = () => {
         <Link href={"/naive-cube"}>Naive Cube</Link>
         <Link href={"/naive-cube"}>Cube with noise</Link>
         <Link href={"/optimize-mesh"}>Optimize Mesh</Link>
-        <Link href={"/ray-casting-2d"}>Ray Casting 2D</Link>
+        <Link href={"/ray-casting"}>Ray Casting</Link>
       </Stack>
     </Container>
   );

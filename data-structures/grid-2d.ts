@@ -1,3 +1,4 @@
+import { LargeNumberLike } from "crypto";
 
 export const to1D = (x: number, y: number, width: number) => {
     return (y * width) + x;
@@ -17,14 +18,14 @@ export enum Direction2D {
 export class Grid2D<T> {
     private _width: number;
     private _height: number;
-    private buffer: Array<T>;
+    private _buffer: Array<T>;
     private neighbourFunctionMap: Record<Direction2D, (x: number, y: number) => number>
 
-    constructor(width: number, height: number) {
+    constructor(width: number, height: number, initialValue: T) {
         this._width = width;
         this._height = height;
-        this.buffer = new Array(this.width * this.height);
-        this.resetBuffer();
+        this._buffer = new Array(this.width * this.height);
+        this.resetBuffer(initialValue);
 
         this.neighbourFunctionMap = {
             [Direction2D.TOP]: (x: number, y: number) =>
@@ -47,8 +48,8 @@ export class Grid2D<T> {
     }
 
     public resetBuffer(val: T) {
-        for (let i = 0; i < this.buffer.length; i++) {
-            this.buffer[i] = val;
+        for (let i = 0; i < this._buffer.length; i++) {
+            this._buffer[i] = val;
         }
     }
 
@@ -57,33 +58,33 @@ export class Grid2D<T> {
     }
 
     public hasNeighbour(direction: Direction2D, x: number, y: number) {
-        const { buffer } = this;
+        const { _buffer } = this;
         const index = this.getNeighbourIndex(direction, x, y);
 
-        if (index < 0 || index > buffer.length) return false;
+        if (index < 0 || index > _buffer.length) return false;
 
-        return !!buffer[index];
+        return !!_buffer[index];
     }
 
     public getNeighbourValue(direction: Direction2D, x: number, y: number) {
-        const { buffer } = this;
+        const { _buffer } = this;
         const index = this.getNeighbourIndex(direction, x, y);
-        if (index < 0 || index > buffer.length) return undefined;
+        if (index < 0 || index > _buffer.length) return undefined;
 
-        return buffer[index];
+        return _buffer[index];
     }
 
     public setValue(x: number, y: number, value: T) {
         const { width, height } = this;
         if (x < 0 || y < 0 || x >= width || y >= height) return;
-        this.buffer[to1D(x, y, width)] = value;
+        this._buffer[to1D(x, y, width)] = value;
     }
 
 
     public getValue(x: number, y: number) {
         const { width, height } = this;
         if (x < 0 || y < 0 || x >= width || y >= height) return undefined;
-        return this.buffer[to1D(x, y, width)];
+        return this._buffer[to1D(x, y, width)];
     }
 
     public get width() {
@@ -94,8 +95,12 @@ export class Grid2D<T> {
         return this._height;
     }
 
+    public get buffer() {
+        return this._buffer;
+    }
+
     public forEach(callback: (value: T, x: number, y: number) => void) {
-        this.buffer.forEach((value, index) => {
+        this._buffer.forEach((value, index) => {
             const { x, y } = to2D(index, this.width);
             return callback(value, x, y)
         })
