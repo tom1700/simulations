@@ -97,7 +97,7 @@ class Renderer3D {
   }
 }
 
-const CubeWithNoise: NextPage = () => {
+const OptimizeMesh: NextPage = () => {
   const [size, setSize] = useState(10);
   const [smoothness, setSmoothness] = useState(1);
   const [resolution, setResolution] = useState(8);
@@ -147,7 +147,7 @@ const CubeWithNoise: NextPage = () => {
       </Typography>
       <div style={{ display: "flex", justifyContent: "space-between" }}>
         <Link href={"/optimize-mesh"}>{"< Optimize Mesh"}</Link>
-        <Link href={"/ray-casting"}>{"Ray casting >"}</Link>
+        <Link href={"/ray-casting-2d"}>{"Ray casting 2D >"}</Link>
       </div>
 
       <Stack spacing={2} direction="row" style={{ flex: 1 }}>
@@ -215,4 +215,4 @@ const CubeWithNoise: NextPage = () => {
   );
 };
 
-export default CubeWithNoise;
+export default OptimizeMesh;

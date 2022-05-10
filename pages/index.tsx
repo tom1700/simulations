@@ -22,6 +22,9 @@ const Home: NextPage = () => {
 
       <Stack spacing={2} style={{ marginTop: "4rem" }}>
         <Link href={"/naive-cube"}>Naive Cube</Link>
+        <Link href={"/naive-cube"}>Cube with noise</Link>
+        <Link href={"/optimize-mesh"}>Optimize Mesh</Link>
+        <Link href={"/ray-casting-2d"}>Ray Casting 2D</Link>
       </Stack>
     </Container>
   );
