@@ -14,15 +14,36 @@ export class EyeMonochrome {
         this.orientation = orientation;
     }
 
-    public updateByRay(ray?: RayMonochrome) {
-        const x = Math.floor(Math.random() * this.receptors.width);
-        const y = Math.floor(Math.random() * this.receptors.height);
-        const currentValue = parseInt(this.receptors.getValue(x, y)?.toString(16).slice(-2) || '0');
+    public updateByRay(ray: RayMonochrome) {
+        const intersection = this.findIntersectionCoords(ray);
+        if (!intersection) return;
+
+        const currentValue = parseInt(this.receptors.getValue(intersection.x, intersection.y)?.toString(16).slice(-2) || '0');
         const newValue = Math.min(currentValue + Math.floor((Math.random() * 256)), 255);
         const newValueString = newValue.toString(16);
         const newColorValue = parseInt(`0xff${newValueString}${newValueString}${newValueString}`, 16);
-        const colorValue = `${newValue}${newValue}`;
-        this.receptors.setValue(x, y, newColorValue);
+        this.receptors.setValue(intersection.x, intersection.y, newColorValue);
+    }
+
+    private findIntersectionCoords(ray: RayMonochrome) {
+        if (this.orientation === Direction.TOP) {
+            if (ray.startPosition.y < this.position.y + 1) {
+                return;
+            }
+        }
+
+        if (this.orientation === Direction.BACK) {
+            if (ray.startPosition.z > this.position.z) {
+                return;
+            }
+            const zDiff = this.position.z - ray.startPosition.z;
+            const partOfVector = zDiff / ray.direction.z;
+            const collision = ray.startPosition.add(ray.direction.multiply(partOfVector));
+            const x = Math.floor((collision.x - this.position.x) * this.receptors.width);
+            const y = Math.floor((collision.y - this.position.y) * this.receptors.width);
+
+            return { x, y };
+        }
     }
 
     public reset() {
