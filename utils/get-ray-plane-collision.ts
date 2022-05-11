@@ -71,19 +71,19 @@ const verifyStartPosition = (rayStartPosition: Vector, plane: Plane) => {
     const planeY = plane.getY();
 
     switch (plane.direction) {
-        case Direction.BACK: return rayStartPosition.z > planeZ;
-        case Direction.FRONT: return rayStartPosition.z < planeZ;
-        case Direction.BOTTOM: return rayStartPosition.y > planeY;
-        case Direction.TOP: return rayStartPosition.y < planeY;
-        case Direction.LEFT: return rayStartPosition.x > planeX;
-        case Direction.RIGHT: return rayStartPosition.x < planeX;
+        case Direction.BACK: return rayStartPosition.z < planeZ;
+        case Direction.FRONT: return rayStartPosition.z > planeZ;
+        case Direction.BOTTOM: return rayStartPosition.y < planeY;
+        case Direction.TOP: return rayStartPosition.y > planeY;
+        case Direction.LEFT: return rayStartPosition.x < planeX;
+        case Direction.RIGHT: return rayStartPosition.x > planeX;
     }
 }
 
 export const getRayPlaneCollision = (plane: Plane, ray: RayMonochrome) => {
     rayStartPosition.copyMutate(ray.startPosition);
     rayDirection.copyMutate(ray.direction);
-
+    
     if (!verifyStartPosition(rayStartPosition, plane)) return;
 
 

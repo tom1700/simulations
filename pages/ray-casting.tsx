@@ -20,8 +20,6 @@ const initializeGrid = () => {
     }
   }
 
-  grid.setValue(4, 0, 1, "stone");
-
   return grid;
 };
 
@@ -36,13 +34,16 @@ const RayCasting: NextPage = () => {
 
     const eye = new EyeMonochrome(
       100,
-      new Vector(5, 1, 9),
+      new Vector(4, 1, 9),
       Direction.BACK
     );
 
-    const lightPosition = new Vector(5, 2, 7);
+    const lightPosition = new Vector(4, 4, 9);
 
     grid.setValue(eye.position.x, eye.position.y, eye.position.z, "eye");
+
+    grid.setValue(3, 1, 7, "ground");
+    grid.setValue(5, 1, 7, "ground");
 
     castRays(grid, eye, lightPosition, raysAmount);
 
@@ -84,8 +85,8 @@ const RayCasting: NextPage = () => {
         <Stack spacing={2} style={{ flex: 1 }}>
           Rays amount: {raysAmount}
           <Slider
-            min={1}
-            max={100000}
+            min={2}
+            max={1000000}
             step={1}
             value={raysAmount}
             onChange={(_, value) => !Array.isArray(value) && setRaysAmount(value)}
