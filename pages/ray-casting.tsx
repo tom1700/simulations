@@ -88,7 +88,7 @@ const RayCasting: NextPage = () => {
           Rays amount: {raysAmount}
           <Slider
             min={2}
-            max={1000000}
+            max={10000000}
             step={1}
             value={raysAmount}
             onChange={(_, value) => !Array.isArray(value) && setRaysAmount(value)}

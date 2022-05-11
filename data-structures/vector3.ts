@@ -125,4 +125,8 @@ export class Vector {
     scalarProduct(vector: Vector) {
         return this.x * vector.x + this.y * vector.y + this.z * vector.z;
     }
+
+    toString() {
+        return `{x:${this.x},y:${this.y},z:${this.z}}`
+    }
 }

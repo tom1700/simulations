@@ -27,6 +27,10 @@ export class EyeMonochrome {
         this.receptors.setValue(intersection.x, intersection.y, newColorValue);
     }
 
+    public updateByCollision(collision: Vector) {
+
+    }
+    
     private findIntersectionCoords(ray: RayMonochrome) {
         const { intersection, direction } = getRayCubeCollision(ray.startPosition, ray.direction, this.position);
 
