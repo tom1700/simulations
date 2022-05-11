@@ -1,3 +1,4 @@
+import { Direction } from "../data-structures/grid-3d";
 import { Vector } from "../data-structures/vector3";
 
 const startPositionContainer = new Vector(0, 0, 0);
@@ -69,35 +70,35 @@ export const getRayCubeCollision = (rayStartPosition: Vector, rayPath: Vector, c
     // Potential hit from the left
     if (rayPath.x > 0 && rayStartPosition.x < cubePosition.x) {
         const intersection = getXIntersection(cubePosition, rayStartPosition, rayPath, cubePosition.x);
-        if (intersection) return intersection;
+        if (intersection) return { intersection, direction: Direction.LEFT };
     }
     // Potential hit from the right
     if (rayPath.x < 0 && rayStartPosition.x > cubePosition.x + 1) {
         const intersection = getXIntersection(cubePosition, rayStartPosition, rayPath, cubePosition.x + 1);
-        if (intersection) return intersection;
+        if (intersection) return { intersection, direction: Direction.RIGHT };
     }
 
     // Potential hit from the bottom
     if (rayPath.y > 0 && rayStartPosition.y < cubePosition.y) {
         const intersection = getYIntersection(cubePosition, rayStartPosition, rayPath, cubePosition.y);
-        if (intersection) return intersection;
+        if (intersection) return { intersection, direction: Direction.BOTTOM };
     }
     // Potential hit from the top
     if (rayPath.y < 0 && rayStartPosition.y > cubePosition.y + 1) {
         const intersection = getYIntersection(cubePosition, rayStartPosition, rayPath, cubePosition.y + 1);
-        if (intersection) return intersection;
+        if (intersection) return { intersection, direction: Direction.TOP };
     }
 
     // Potential hit from the back
     if (rayPath.z > 0 && rayStartPosition.z < cubePosition.z) {
         const intersection = getZIntersection(cubePosition, rayStartPosition, rayPath, cubePosition.z);
-        if (intersection) return intersection;
+        if (intersection) return { intersection, direction: Direction.BACK };
     }
     // Potential hit from the front
     if (rayPath.z < 0 && rayStartPosition.z > cubePosition.z + 1) {
         const intersection = getZIntersection(cubePosition, rayStartPosition, rayPath, cubePosition.z + 1);
-        if (intersection) return intersection;
+        if (intersection) return { intersection, direction: Direction.FRONT };
     }
 
-    return undefined;
+    return {};
 }

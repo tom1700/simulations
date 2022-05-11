@@ -23,6 +23,8 @@ const initializeGrid = () => {
   return grid;
 };
 
+const EYE_RESOLUTION = 200;
+
 const RayCasting: NextPage = () => {
   const [raysAmount, setRaysAmount] = useState(1000);
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -33,7 +35,7 @@ const RayCasting: NextPage = () => {
     const grid = initializeGrid();
 
     const eye = new EyeMonochrome(
-      100,
+      EYE_RESOLUTION,
       new Vector(4, 1, 9),
       Direction.BACK
     );
@@ -42,14 +44,14 @@ const RayCasting: NextPage = () => {
 
     grid.setValue(eye.position.x, eye.position.y, eye.position.z, "eye");
 
-    grid.setValue(3, 1, 7, "ground");
-    grid.setValue(5, 1, 7, "ground");
+    grid.setValue(4, 2, 7, "ground");
+    grid.setValue(4, 1, 7, "ground");
 
     castRays(grid, eye, lightPosition, raysAmount);
 
     canvasDrawer.drawBitmap(
       Uint32Array.from(eye.receptors.buffer),
-      100
+      EYE_RESOLUTION
     );
   }, [raysAmount]);
 

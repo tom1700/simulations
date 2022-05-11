@@ -2,11 +2,10 @@ import { Grid2D } from "../data-structures/grid-2d";
 import { Direction } from "../data-structures/grid-3d";
 import { Plane } from "../data-structures/plane";
 import { Vector } from "../data-structures/vector3";
-import { getRayPlaneCollision } from "../utils/get-ray-plane-collision";
+import { getRayCubeCollision } from "../utils/get-ray-cube-collision";
 import { RayMonochrome } from "./ray-monochrome";
 
 export class EyeMonochrome {
-    private receptorsPlane: Plane;
     public receptors: Grid2D<number>;
     public position: Vector;
     public orientation: Direction;
@@ -15,7 +14,6 @@ export class EyeMonochrome {
         this.receptors = new Grid2D<number>(resolution, resolution, 0xff000000);
         this.position = position;
         this.orientation = orientation;
-        this.receptorsPlane = new Plane(this.position, orientation);
     }
 
     public updateByRay(ray: RayMonochrome) {
@@ -30,28 +28,28 @@ export class EyeMonochrome {
     }
 
     private findIntersectionCoords(ray: RayMonochrome) {
-        const collision = getRayPlaneCollision(this.receptorsPlane, ray);
+        const { intersection, direction } = getRayCubeCollision(ray.startPosition, ray.direction, this.position);
 
-        if (!collision) return;
+        if (!intersection || this.orientation !== direction) return;
 
         switch (this.orientation) {
             case Direction.FRONT:
             case Direction.BACK:
                 return {
-                    x: Math.floor((collision.x - this.position.x) * this.receptors.width),
-                    y: Math.floor((collision.y - this.position.y) * this.receptors.height)
+                    x: Math.floor((intersection.x - this.position.x) * this.receptors.width),
+                    y: Math.floor((intersection.y - this.position.y) * this.receptors.height)
                 }
             case Direction.TOP:
             case Direction.BOTTOM:
                 return {
-                    x: Math.floor((collision.x - this.position.x) * this.receptors.width),
-                    y: Math.floor((collision.z - this.position.z) * this.receptors.height)
+                    x: Math.floor((intersection.x - this.position.x) * this.receptors.width),
+                    y: Math.floor((intersection.z - this.position.z) * this.receptors.height)
                 }
             case Direction.LEFT:
             case Direction.RIGHT:
                 return {
-                    x: Math.floor((collision.z - this.position.z) * this.receptors.width),
-                    y: Math.floor((collision.y - this.position.y) * this.receptors.height)
+                    x: Math.floor((intersection.z - this.position.z) * this.receptors.width),
+                    y: Math.floor((intersection.y - this.position.y) * this.receptors.height)
                 }
         }
     }

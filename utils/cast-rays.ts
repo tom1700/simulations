@@ -1,6 +1,6 @@
 import { EyeMonochrome } from "../actors/eye-monochrome";
 import { RayMonochrome } from "../actors/ray-monochrome";
-import { Grid3D } from "../data-structures/grid-3d";
+import { Direction, Grid3D } from "../data-structures/grid-3d";
 import { Vector } from "../data-structures/vector3";
 import { getRayCubeCollision } from "./get-ray-cube-collision";
 
@@ -49,18 +49,18 @@ const castRay = (ray: RayMonochrome, grid: Grid3D, eye: EyeMonochrome) => {
         }
 
         if (value === 'ground') {
-            const collision = getRayCubeCollision(ray.startPosition.clone(), incrementVector.clone(), new Vector(x, y, z));
+            const { direction, intersection } = getRayCubeCollision(ray.startPosition.clone(), incrementVector.clone(), new Vector(x, y, z));
 
-            if (!collision) return;
+            if (!intersection) return;
 
-            ray.startPosition.copyMutate(collision);
-            if (collision.y === y || collision.y === y + 1) {
+            ray.startPosition.copyMutate(intersection);
+            if (direction === Direction.TOP || direction === Direction.BOTTOM) {
                 ray.direction.y = ray.direction.y * -1;
             }
-            if (collision.x === x || collision.x === x + 1) {
+            if (direction === Direction.LEFT || direction === Direction.RIGHT) {
                 ray.direction.x = ray.direction.x * -1;
             }
-            if (collision.z === z || collision.z === z + 1) {
+            if (direction === Direction.BACK || direction === Direction.FRONT) {
                 ray.direction.z = ray.direction.z * -1;
             }
             incrementVector.copyMutate(ray.direction).multiplyMutate(0.1);
@@ -74,8 +74,10 @@ const castRay = (ray: RayMonochrome, grid: Grid3D, eye: EyeMonochrome) => {
 }
 
 export const castRays = (grid: Grid3D, eye: EyeMonochrome, lightSourcePosition: Vector, raysAmount: number) => {
+    console.time('Ray Casting')
     forEachDirection((direction) => {
         const ray = new RayMonochrome(direction, lightSourcePosition.clone(), 255);
         castRay(ray, grid, eye);
     }, raysAmount)
+    console.timeEnd('Ray Casting')
 }
