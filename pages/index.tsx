@@ -25,7 +25,7 @@ const Home: NextPage = () => {
         <Link href={"/naive-cube"}>Cube with noise</Link>
         <Link href={"/optimize-mesh"}>Optimize Mesh</Link>
         <Link href={"/particle-gravity"}>Particle Gravity</Link>
-        <Link href={"/particle-collision"}>Particle Gravity</Link>
+        <Link href={"/particle-collision"}>Particle Collision</Link>
       </Stack>
     </Container>
   );

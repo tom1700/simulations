@@ -66,6 +66,14 @@ export class Vector {
         )
     }
 
+    subtract(vector: Vector) {
+        return new Vector(
+            this.x - vector.x,
+            this.y - vector.y,
+            this.z - vector.z
+        )
+    }
+
     floor() {
         return new Vector(
             Math.floor(this.x),
@@ -95,6 +103,13 @@ export class Vector {
         this.y += vector.y;
         this.z += vector.z;
 
+        return this;
+    }
+
+    subtractMutate(vector: Vector) {
+        this.x -= vector.x;
+        this.y -= vector.y;
+        this.z -= vector.z
         return this;
     }
 
