@@ -4,7 +4,7 @@ import { Direction, Grid3D } from "../data-structures/grid-3d";
 import { Vector } from "../data-structures/vector3";
 import { getRayCubeCollision } from "./get-ray-cube-collision";
 
-const RAY_STRENGTH = 100;
+const RAY_STRENGTH = 255;
 
 const forEachDirection = (callback: (vector: Vector) => void, samples: number) => {
     const phi = Math.PI * (3. - Math.sqrt(5.))  // golden angle in radians
@@ -26,12 +26,11 @@ const rayLenght1D = new Vector(0, 0, 0);
 const rayUnitStepSize = new Vector(0, 0, 0);
 const currentCell = new Vector(0, 0, 0);
 const step = new Vector(0, 0, 0);
-const collision = new Vector(0, 0, 0);
 const direction = new Vector(0,0,0);
 
 const initializeRayVectors = (ray: RayMonochrome, grid: Grid3D) => {
-    currentCell.copyMutate(ray.startPosition).floorMutate();
-    direction.copyMutate(ray.direction);
+    currentCell.cloneFrom(ray.startPosition).floorMutate();
+    direction.cloneFrom(ray.direction);
     rayUnitStepSize.x = Math.sqrt(1 + Math.pow((ray.direction.y / ray.direction.x), 2) + Math.pow((ray.direction.z / ray.direction.x), 2));
     rayUnitStepSize.y = Math.sqrt(1 + Math.pow((ray.direction.x / ray.direction.y), 2) + Math.pow((ray.direction.z / ray.direction.y), 2));
     rayUnitStepSize.z = Math.sqrt(1 + Math.pow((ray.direction.x / ray.direction.z), 2) + Math.pow((ray.direction.y / ray.direction.z), 2));
@@ -98,7 +97,7 @@ const castRay = (ray: RayMonochrome, grid: Grid3D, eye: EyeMonochrome) => {
     
                 if (!intersection) return;
     
-                ray.startPosition.copyMutate(intersection);
+                ray.startPosition.cloneFrom(intersection);
     
                 if (direction === Direction.TOP || direction === Direction.BOTTOM) {
                     ray.direction.y = ray.direction.y * -1;

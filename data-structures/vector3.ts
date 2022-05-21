@@ -98,7 +98,7 @@ export class Vector {
         return this;
     }
 
-    copyMutate(vector: Vector) {
+    cloneFrom(vector: Vector) {
         this.x = vector.x;
         this.y = vector.y;
         this.z = vector.z;

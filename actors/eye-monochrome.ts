@@ -1,6 +1,5 @@
 import { Grid2D } from "../data-structures/grid-2d";
 import { Direction } from "../data-structures/grid-3d";
-import { Plane } from "../data-structures/plane";
 import { Vector } from "../data-structures/vector3";
 import { getRayCubeCollision } from "../utils/get-ray-cube-collision";
 import { RayMonochrome } from "./ray-monochrome";
@@ -30,7 +29,7 @@ export class EyeMonochrome {
     public updateByCollision(collision: Vector) {
 
     }
-    
+
     private findIntersectionCoords(ray: RayMonochrome) {
         const { intersection, direction } = getRayCubeCollision(ray.startPosition, ray.direction, this.position);
 

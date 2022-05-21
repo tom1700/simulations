@@ -23,7 +23,7 @@ const initializeGrid = () => {
   return grid;
 };
 
-const EYE_RESOLUTION = 200;
+const EYE_RESOLUTION = 300;
 
 const RayCasting: NextPage = () => {
   const [raysAmount, setRaysAmount] = useState(1000);
@@ -44,8 +44,19 @@ const RayCasting: NextPage = () => {
 
     grid.setValue(eye.position.x, eye.position.y, eye.position.z, "eye");
 
+    // FRONT WALL
+    // grid.setValue(3, 1, 4, "ground");
+    // grid.setValue(4, 1, 4, "ground");
+    // grid.setValue(5, 1, 4, "ground");
+    // grid.setValue(3, 2, 4, "ground");
     grid.setValue(4, 2, 7, "ground");
-    grid.setValue(4, 1, 7, "ground");
+    // grid.setValue(5, 2, 4, "ground");
+    // grid.setValue(3, 3, 4, "ground");
+    // grid.setValue(4, 3, 4, "ground");
+    // grid.setValue(5, 3, 4, "ground");
+
+    grid.setValue(3, 1, 9, "ground");
+    grid.setValue(5, 1, 9, "ground");
 
     castRays(grid, eye, lightPosition, raysAmount);
 

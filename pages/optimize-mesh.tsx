@@ -147,7 +147,7 @@ const OptimizeMesh: NextPage = () => {
       </Typography>
       <div style={{ display: "flex", justifyContent: "space-between" }}>
         <Link href={"/optimize-mesh"}>{"< Optimize Mesh"}</Link>
-        <Link href={"/ray-casting-2d"}>{"Ray casting 2D >"}</Link>
+        <Link href={"/particle-gravity"}>{"Particle Gravity >"}</Link>
       </div>
 
       <Stack spacing={2} direction="row" style={{ flex: 1 }}>

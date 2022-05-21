@@ -12,8 +12,8 @@ const getXIntersection = (cubePosition: Vector, rayStartPosition: Vector, rayPat
     const front = cubePosition.z + 1;
     const back = cubePosition.z;
 
-    startPositionContainer.copyMutate(rayStartPosition);
-    rayPathContainer.copyMutate(rayPath)
+    startPositionContainer.cloneFrom(rayStartPosition);
+    rayPathContainer.cloneFrom(rayPath)
 
     const xDiff = planeX - rayStartPosition.x;
     const fraction = xDiff / rayPath.x;
@@ -32,8 +32,8 @@ const getYIntersection = (cubePosition: Vector, rayStartPosition: Vector, rayPat
     const front = cubePosition.z + 1;
     const back = cubePosition.z;
 
-    startPositionContainer.copyMutate(rayStartPosition);
-    rayPathContainer.copyMutate(rayPath)
+    startPositionContainer.cloneFrom(rayStartPosition);
+    rayPathContainer.cloneFrom(rayPath)
 
     const yDiff = planeY - rayStartPosition.y;
     const fraction = yDiff / rayPath.y;
@@ -52,8 +52,8 @@ const getZIntersection = (cubePosition: Vector, rayStartPosition: Vector, rayPat
     const top = cubePosition.y + 1;
     const bottom = cubePosition.y;
 
-    startPositionContainer.copyMutate(rayStartPosition);
-    rayPathContainer.copyMutate(rayPath)
+    startPositionContainer.cloneFrom(rayStartPosition);
+    rayPathContainer.cloneFrom(rayPath)
 
     const zDiff = planeZ - rayStartPosition.z;
     const fraction = zDiff / rayPath.z;
