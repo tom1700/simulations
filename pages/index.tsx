@@ -26,6 +26,7 @@ const Home: NextPage = () => {
         <Link href={"/optimize-mesh"}>Optimize Mesh</Link>
         <Link href={"/particle-gravity"}>Particle Gravity</Link>
         <Link href={"/particle-collision"}>Particle Collision</Link>
+        <Link href={"/particle-collision-with-worker"}>Particle Collision Web Worker</Link>
       </Stack>
     </Container>
   );

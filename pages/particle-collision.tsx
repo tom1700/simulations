@@ -174,7 +174,7 @@ const ParticleGravity: NextPage = () => {
   const [worldSize, setWorldSize] = useState(10);
   const [particlesAmount, setParticlesAmount] = useState(10);
 
-  const createCube = useCallback(() => {
+  const startSimulation = useCallback(() => {
     if (renderer3D.current) {
       renderer3D.current.stopAnimation();
     }
@@ -209,8 +209,8 @@ const ParticleGravity: NextPage = () => {
         Gravity simulation for a single particle
       </Typography>
       <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <Link href={"/particle-gravity"}>{"< Optimize Mesh"}</Link>
-        <Link href={"/particle-collision"}>{"Particle Collision >"}</Link>
+        <Link href={"/particle-gravity"}>{"< Particle Gravity"}</Link>
+        <Link href={"/particle-collision-with-worker"}>{"Particle Collision Web Worker >"}</Link>
       </div>
 
       <Stack spacing={2} direction="row" style={{ flex: 1 }}>
@@ -237,7 +237,7 @@ const ParticleGravity: NextPage = () => {
             }
           />
           <div>FPS: <span ref={fpsCounterRef}>0</span></div>
-          <Button onClick={createCube}>Simulate</Button>
+          <Button onClick={startSimulation}>Simulate</Button>
         </Stack>
       </Stack>
     </Container>

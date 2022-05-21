@@ -108,7 +108,7 @@ const CubeWithNoise: NextPage = () => {
   const renderer3D = useRef<Renderer3D>();
   const canvas = useRef<HTMLDivElement>(null);
 
-  const createCube = useCallback(() => {
+  const startSimulation = useCallback(() => {
     if (renderer3D.current) {
       renderer3D.current.stopAnimation();
     }
@@ -195,7 +195,7 @@ const CubeWithNoise: NextPage = () => {
               !Array.isArray(value) && setNoiseStrengthReduction(value)
             }
           />
-          <Button onClick={createCube}>Create</Button>
+          <Button onClick={startSimulation}>Create</Button>
         </Stack>
       </Stack>
     </Container>

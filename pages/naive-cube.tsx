@@ -76,7 +76,7 @@ const NaiveCube: NextPage = () => {
   const renderer3D = useRef<Renderer3D>();
   const canvas = useRef<HTMLDivElement>(null);
 
-  const createCube = useCallback(() => {
+  const startSimulation = useCallback(() => {
     if (renderer3D.current) {
       renderer3D.current.stopAnimation();
     }
@@ -138,7 +138,7 @@ const NaiveCube: NextPage = () => {
           />
           Total Grid Size:{" "}
           {Math.pow(size / calculateResolutionValue(resolution), 3)}
-          <Button onClick={createCube}>Create</Button>
+          <Button onClick={startSimulation}>Create</Button>
         </Stack>
       </Stack>
     </Container>

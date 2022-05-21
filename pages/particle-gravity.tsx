@@ -81,7 +81,7 @@ const ParticleGravity: NextPage = () => {
   const renderer3D = useRef<Renderer3D>();
   const canvas = useRef<HTMLDivElement>(null);
 
-  const createCube = useCallback(() => {
+  const startSimulation = useCallback(() => {
     if (renderer3D.current) {
       renderer3D.current.stopAnimation();
     }
@@ -119,7 +119,7 @@ const ParticleGravity: NextPage = () => {
       <Stack spacing={2} direction="row" style={{ flex: 1 }}>
         <div style={{ flex: 2 }} ref={canvas}></div>
         <Stack spacing={2} style={{ flex: 1 }}>
-          <Button onClick={createCube}>Simulate</Button>
+          <Button onClick={startSimulation}>Simulate</Button>
         </Stack>
       </Stack>
     </Container>
