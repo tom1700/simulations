@@ -1,15 +1,12 @@
 import type { NextPage } from "next";
-import Head from "next/head";
-import { Container, Typography, Stack, Slider } from "@mui/material";
+import { Stack, Slider } from "@mui/material";
 import Button from "@mui/material/Button";
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import * as CANNON from "cannon";
 import * as THREE from "three";
 import { createBasicScene } from "../utils/create-basic-scene";
-import { getRandomValueWithinBounds } from "../utils/get-random-value-within-bounds";
 import { ParticleInfo } from "../workers/types";
 import { Page } from "../components/Page";
+import throttle from "lodash/throttle";
 
 const RADIUS = 1;
 
@@ -26,20 +23,14 @@ const updateMeshPosition = (mesh: THREE.Mesh, particle: ParticleInfo) => {
 class Renderer3D {
   private shouldStop = false;
   private worldSize: number;
-  private particlesAmount: number;
   private onFPSUpdate: (fps: number) => void;
   private isInitialized = false;
   private scene?: THREE.Scene;
   private idIndexMap: { [key: string]: number } = {};
   private sphereMeshes: THREE.Mesh[] = [];
 
-  constructor(
-    worldSize: number,
-    particlesAmount: number,
-    onFPSUpdate: (fps: number) => void
-  ) {
+  constructor(worldSize: number, onFPSUpdate: (fps: number) => void) {
     this.worldSize = worldSize;
-    this.particlesAmount = particlesAmount;
     this.onFPSUpdate = onFPSUpdate;
   }
 
@@ -80,12 +71,15 @@ class Renderer3D {
     );
 
     this.scene = scene;
-
+    let prevTime = Date.now();
     const animate = () => {
       if (this.shouldStop) {
         removeScene();
         return;
       }
+      const currentTime = Date.now();
+      this.onFPSUpdate(1000 / (currentTime - prevTime));
+      prevTime = currentTime;
       requestAnimationFrame(animate);
       render();
     };
@@ -125,15 +119,13 @@ const ParticleGravity: NextPage = () => {
       workerRef.current.postMessage({ type: "STOP" });
     }
 
-    renderer3D.current = new Renderer3D(
-      worldSize,
-      particlesAmount,
-      (fps: number) => {
-        if (fpsCounterRef.current) {
-          fpsCounterRef.current.innerText = fps.toFixed(0);
-        }
+    const updateFps = (fps: number) => {
+      if (fpsCounterRef.current) {
+        fpsCounterRef.current.innerText = fps.toFixed(0);
       }
-    );
+    };
+
+    renderer3D.current = new Renderer3D(worldSize, throttle(updateFps, 1000));
 
     renderer3D.current.startAnimation(canvas.current);
 
