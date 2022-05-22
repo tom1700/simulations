@@ -27,6 +27,7 @@ const Home: NextPage = () => {
         <Link href={"/particle-gravity"}>Particle Gravity</Link>
         <Link href={"/particle-collision"}>Particle Collision</Link>
         <Link href={"/particle-collision-with-worker"}>Particle Collision Web Worker</Link>
+        <Link href={"/particle-collision-with-worker-ammo"}>Particle Collision Web Worker with ammo.js</Link>
       </Stack>
     </Container>
   );

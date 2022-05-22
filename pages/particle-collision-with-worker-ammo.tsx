@@ -1,5 +1,5 @@
 import type { NextPage } from "next";
-import { Stack, Slider } from "@mui/material";
+import { Stack, Slider, Typography } from "@mui/material";
 import Button from "@mui/material/Button";
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
@@ -10,10 +10,14 @@ import throttle from "lodash/throttle";
 
 const RADIUS = 1;
 
-const updateMeshPosition = (mesh: THREE.Mesh, particle: ParticleInfo) => {
-  mesh.position.x = particle.x;
-  mesh.position.y = particle.y;
-  mesh.position.z = particle.z;
+const updateMeshPosition = (
+  mesh: THREE.Mesh,
+  particle: ParticleInfo,
+  worldSize: number
+) => {
+  mesh.position.x = particle.x - worldSize / 2;
+  mesh.position.y = particle.y - worldSize / 2;
+  mesh.position.z = particle.z - worldSize / 2;
   mesh.quaternion.x = particle.quaternionX;
   mesh.quaternion.y = particle.quaternionY;
   mesh.quaternion.z = particle.quaternionZ;
@@ -41,7 +45,11 @@ class Renderer3D {
       const geometry = new THREE.SphereGeometry(RADIUS);
       const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
       const sphere = new THREE.Mesh(geometry, material);
-      sphere.position.set(particle.x, particle.y, particle.z);
+      sphere.position.set(
+        particle.x - this.worldSize / 2,
+        particle.y - this.worldSize / 2,
+        particle.z - this.worldSize / 2
+      );
 
       this.scene?.add(sphere);
 
@@ -59,7 +67,8 @@ class Renderer3D {
     particles.forEach((particle) => {
       updateMeshPosition(
         this.sphereMeshes[this.idIndexMap[particle.id]],
-        particle
+        particle,
+        this.worldSize
       );
     });
   }
@@ -103,7 +112,7 @@ const ParticleGravity: NextPage = () => {
 
   useEffect(() => {
     workerRef.current = new Worker(
-      new URL("../workers/engine-worker.ts", import.meta.url)
+      new URL("../workers/engine-ammo-worker.ts", import.meta.url)
     );
 
     return () => {
@@ -145,12 +154,14 @@ const ParticleGravity: NextPage = () => {
   return (
     <Page
       title="Particle simulation with collisions and webworker"
-      subtitle={`The same as before but this time I'm moving the physics engine to webworker to improve performance`}
-      backLink="/particle-collision"
-      backLabel="< Particle Collision"
-      forwardLink="/particle-collision-with-worker-ammo"
-      forwardLabel="Particle Collision with ammo >"
+      subtitle={`The same as before but this time I'm using ammo physics engine.`}
+      backLink="/particle-collision-with-worker"
+      backLabel="< Particle Collision with worker"
     >
+      <Typography component={"p"}>
+        Sorry for lack of live measurements, but it seems to be around 5 times
+        faster then the previous version for 2k particles.
+      </Typography>
       <Stack spacing={2} direction="row" style={{ flex: 1 }}>
         <div style={{ flex: 2 }} ref={canvas}></div>
         <Stack spacing={2} style={{ flex: 1 }}>

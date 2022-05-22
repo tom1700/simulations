@@ -129,7 +129,9 @@ class EngineWorker {
       requestAnimationFrame(simloop);
 
       var dt = (time - lastTime) / 1000;
+      console.time('Simulate')
       this.world?.step(fixedTimeStep, dt, maxSubSteps);
+      console.timeEnd('Simulate')
       this.sendUpdate();
       lastTime = time;
     };
