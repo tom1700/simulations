@@ -1,12 +1,11 @@
 import type { NextPage } from "next";
-import Head from "next/head";
-import { Container, Typography, Stack } from "@mui/material";
+import { Stack } from "@mui/material";
 import Slider from "@mui/material/Slider";
 import Button from "@mui/material/Button";
 import { useCallback, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import Link from "next/link";
+import { Page } from "../components/Page";
 
 function resolutionLabelFormat(value: number) {
   return value;
@@ -90,28 +89,14 @@ const NaiveCube: NextPage = () => {
   }, [resolution, size]);
 
   return (
-    <Container
-      maxWidth="lg"
-      style={{
-        minHeight: "100vh",
-        paddingTop: "1rem",
-        display: "flex",
-        flexDirection: "column",
-      }}
+    <Page
+      title="Dynamic Cube Naive implementation"
+      subtitle={`Making a big cube out of a smaller cubes.`}
+      backLink="/"
+      backLabel="< Home"
+      forwardLink="/cube-with-noise"
+      forwardLabel="Cube With Noise >"
     >
-      <Head>
-        <title>Simulations</title>
-        <meta name="description" content="Dynamic Cube Naive implementation" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <Typography variant="h3" component="h1">
-        Dynamic Cube Naive implementation
-      </Typography>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <Link href={"/"}>{"< Home"}</Link>
-        <Link href={"/cube-with-noise"}>{"Cube With Noise >"}</Link>
-      </div>
-
       <Stack spacing={2} direction="row" style={{ flex: 1 }}>
         <div style={{ flex: 2 }} ref={canvas}></div>
         <Stack spacing={2} style={{ flex: 1 }}>
@@ -141,7 +126,7 @@ const NaiveCube: NextPage = () => {
           <Button onClick={startSimulation}>Create</Button>
         </Stack>
       </Stack>
-    </Container>
+    </Page>
   );
 };
 

@@ -9,6 +9,7 @@ import * as THREE from "three";
 import { createBasicScene } from "../utils/create-basic-scene";
 import { getRandomValueWithinBounds } from "../utils/get-random-value-within-bounds";
 import { ParticleInfo } from "../workers/types";
+import { Page } from "../components/Page";
 
 const RADIUS = 1;
 
@@ -150,30 +151,12 @@ const ParticleGravity: NextPage = () => {
   }, [particlesAmount, worldSize]);
 
   return (
-    <Container
-      maxWidth="lg"
-      style={{
-        minHeight: "100vh",
-        paddingTop: "1rem",
-        display: "flex",
-        flexDirection: "column",
-      }}
+    <Page
+      title="Particle simulation with collisions and webworker"
+      subtitle={`The same as before but this time I'm moving the physics engine to webworker to improve performance`}
+      backLink="/particle-collision"
+      backLabel="< Particle Collision"
     >
-      <Head>
-        <title>Simulations</title>
-        <meta
-          name="description"
-          content="Gravity simulation for a single particle"
-        />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <Typography variant="h3" component="h1">
-        Gravity simulation for a single particle
-      </Typography>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <Link href={"/particle-collision"}>{"< Particle Collision"}</Link>
-      </div>
-
       <Stack spacing={2} direction="row" style={{ flex: 1 }}>
         <div style={{ flex: 2 }} ref={canvas}></div>
         <Stack spacing={2} style={{ flex: 1 }}>
@@ -203,7 +186,7 @@ const ParticleGravity: NextPage = () => {
           <Button onClick={startSimulation}>Simulate</Button>
         </Stack>
       </Stack>
-    </Container>
+    </Page>
   );
 };
 

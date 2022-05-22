@@ -1,15 +1,14 @@
 import type { NextPage } from "next";
-import Head from "next/head";
-import { Container, Typography, Stack } from "@mui/material";
+import { Stack } from "@mui/material";
 import Slider from "@mui/material/Slider";
 import Button from "@mui/material/Button";
 import { useCallback, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { Grid3D } from "../data-structures/grid-3d";
-import Link from "next/link";
 import Input from "@mui/material/Input";
 import { populateGridWithFlatNoise } from "../noise/simplex";
+import { Page } from "../components/Page";
 
 function resolutionLabelFormat(value: number) {
   return value;
@@ -125,28 +124,14 @@ const CubeWithNoise: NextPage = () => {
   }, [noiseStrengthReduction, resolution, seed, size, smoothness]);
 
   return (
-    <Container
-      maxWidth="lg"
-      style={{
-        minHeight: "100vh",
-        paddingTop: "1rem",
-        display: "flex",
-        flexDirection: "column",
-      }}
+    <Page
+      title="Cube based on noise"
+      subtitle={`Instead of having a uniform grid, I'm introducing some noise. The result is minecraft-like terrain. Each cube is still a Three.js box.`}
+      backLink="/naive-cube"
+      backLabel="< Naive Cube"
+      forwardLink="/optimize-mesh"
+      forwardLabel="Optimize Mesh >"
     >
-      <Head>
-        <title>Simulations</title>
-        <meta name="description" content="Cube based on noise" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <Typography variant="h3" component="h1">
-        Cube based on noise
-      </Typography>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <Link href={"/naive-cube"}>{"< Naive Cube"}</Link>
-        <Link href={"/optimize-mesh"}>{"Optimize Mesh >"}</Link>
-      </div>
-
       <Stack spacing={2} direction="row" style={{ flex: 1 }}>
         <div style={{ flex: 2 }} ref={canvas}></div>
         <Stack spacing={2} style={{ flex: 1 }}>
@@ -198,7 +183,7 @@ const CubeWithNoise: NextPage = () => {
           <Button onClick={startSimulation}>Create</Button>
         </Stack>
       </Stack>
-    </Container>
+    </Page>
   );
 };
 

@@ -11,6 +11,7 @@ import Input from "@mui/material/Input";
 import { populateGridWithFlatNoise } from "../noise/simplex";
 import { grid3DToGeometry } from "../utils/grid-3d-to-geometry";
 import { createBasicScene } from "../utils/create-basic-scene";
+import { Page } from "../components/Page";
 
 function resolutionLabelFormat(value: number) {
   return value;
@@ -125,31 +126,14 @@ const OptimizeMesh: NextPage = () => {
   }, [noiseStrengthReduction, resolution, seed, size, smoothness, withMesh]);
 
   return (
-    <Container
-      maxWidth="lg"
-      style={{
-        minHeight: "100vh",
-        paddingTop: "1rem",
-        display: "flex",
-        flexDirection: "column",
-      }}
+    <Page
+      title="Cube based on noise with optimized mesh"
+      subtitle={`The same as the previous one, but this time I'm building a custom geometry to avoid rendering the vertices that are inside.`}
+      backLink="/cube-with-noise"
+      backLabel="< Cube with noise"
+      forwardLink="/particle-gravity"
+      forwardLabel="Particle Gravity >"
     >
-      <Head>
-        <title>Simulations</title>
-        <meta
-          name="description"
-          content="Cube based on noise with optimized mesh"
-        />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <Typography variant="h3" component="h1">
-        Cube based on noise with optimized mesh
-      </Typography>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <Link href={"/optimize-mesh"}>{"< Optimize Mesh"}</Link>
-        <Link href={"/particle-gravity"}>{"Particle Gravity >"}</Link>
-      </div>
-
       <Stack spacing={2} direction="row" style={{ flex: 1 }}>
         <div style={{ flex: 2 }} ref={canvas}></div>
         <Stack spacing={2} style={{ flex: 1 }}>
@@ -211,7 +195,7 @@ const OptimizeMesh: NextPage = () => {
           <Button onClick={startSimulation}>Create</Button>
         </Stack>
       </Stack>
-    </Container>
+    </Page>
   );
 };
 

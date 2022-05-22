@@ -1,13 +1,13 @@
 import type { NextPage } from "next";
-import Head from "next/head";
-import { Container, Typography, Stack, Slider } from "@mui/material";
+import { Stack, Slider } from "@mui/material";
 import Button from "@mui/material/Button";
 import { useCallback, useRef, useState } from "react";
-import Link from "next/link";
 import * as CANNON from "cannon";
 import * as THREE from "three";
 import { createBasicScene } from "../utils/create-basic-scene";
 import { getRandomValueWithinBounds } from "../utils/get-random-value-within-bounds";
+import { Page } from "../components/Page";
+import throttle from 'lodash/throttle';
 
 const RADIUS = 1;
 
@@ -179,40 +179,30 @@ const ParticleGravity: NextPage = () => {
       renderer3D.current.stopAnimation();
     }
     if (!canvas.current) return;
-    renderer3D.current = new Renderer3D(worldSize, particlesAmount, (fps: number) => {
-      if(fpsCounterRef.current) {
+
+    const updateFps = (fps: number) => {
+      if (fpsCounterRef.current) {
         fpsCounterRef.current.innerText = fps.toFixed(0);
       }
-    });
+    };
+
+    renderer3D.current = new Renderer3D(
+      worldSize,
+      particlesAmount,
+      throttle(updateFps, 1000)
+    );
     renderer3D.current.startAnimation(canvas.current);
   }, [particlesAmount, worldSize]);
 
   return (
-    <Container
-      maxWidth="lg"
-      style={{
-        minHeight: "100vh",
-        paddingTop: "1rem",
-        display: "flex",
-        flexDirection: "column",
-      }}
+    <Page
+      title="Particle simulation with collisions"
+      subtitle={`This time I'm using cannon.js for a proper physics simulation`}
+      backLink="/particle-gravity"
+      backLabel="< Particle Gravity"
+      forwardLink="/particle-collision-with-worker"
+      forwardLabel="Particle Collision Web Worker >"
     >
-      <Head>
-        <title>Simulations</title>
-        <meta
-          name="description"
-          content="Gravity simulation for a single particle"
-        />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <Typography variant="h3" component="h1">
-        Gravity simulation for a single particle
-      </Typography>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <Link href={"/particle-gravity"}>{"< Particle Gravity"}</Link>
-        <Link href={"/particle-collision-with-worker"}>{"Particle Collision Web Worker >"}</Link>
-      </div>
-
       <Stack spacing={2} direction="row" style={{ flex: 1 }}>
         <div style={{ flex: 2 }} ref={canvas}></div>
         <Stack spacing={2} style={{ flex: 1 }}>
@@ -236,11 +226,13 @@ const ParticleGravity: NextPage = () => {
               !Array.isArray(value) && setParticlesAmount(value)
             }
           />
-          <div>FPS: <span ref={fpsCounterRef}>0</span></div>
+          <div>
+            FPS: <span ref={fpsCounterRef}>0</span>
+          </div>
           <Button onClick={startSimulation}>Simulate</Button>
         </Stack>
       </Stack>
-    </Container>
+    </Page>
   );
 };
 
