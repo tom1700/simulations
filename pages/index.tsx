@@ -21,13 +21,27 @@ const Home: NextPage = () => {
       </Typography>
 
       <Stack spacing={2} style={{ marginTop: "4rem" }}>
+        <Typography component="p">
+          <b>3D Simulations</b>
+        </Typography>
         <Link href={"/naive-cube"}>Naive Cube</Link>
         <Link href={"/naive-cube"}>Cube with noise</Link>
         <Link href={"/optimize-mesh"}>Optimize Mesh</Link>
         <Link href={"/particle-gravity"}>Particle Gravity</Link>
         <Link href={"/particle-collision"}>Particle Collision</Link>
-        <Link href={"/particle-collision-with-worker"}>Particle Collision Web Worker</Link>
-        <Link href={"/particle-collision-with-worker-ammo"}>Particle Collision Web Worker with ammo.js</Link>
+        <Link href={"/particle-collision-with-worker"}>
+          Particle Collision Web Worker
+        </Link>
+        <Link href={"/particle-collision-with-worker-ammo"}>
+          Particle Collision Web Worker with ammo.js
+        </Link>
+      </Stack>
+
+      <Stack spacing={2} style={{ marginTop: "4rem" }}>
+        <Typography component="p">
+          <b>VR Simulations</b>
+        </Typography>
+        <Link href={"/vr-scene"}>VR Scene</Link>
       </Stack>
     </Container>
   );

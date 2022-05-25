@@ -160,7 +160,7 @@ const ParticleGravity: NextPage = () => {
     >
       <Typography component={"p"}>
         Sorry for lack of live measurements, but it seems to be around 5 times
-        faster then the previous version for 2k particles.
+        faster then the previous version for 2k particles. It does not run on the github pages for some reason.
       </Typography>
       <Stack spacing={2} direction="row" style={{ flex: 1 }}>
         <div style={{ flex: 2 }} ref={canvas}></div>
@@ -178,7 +178,7 @@ const ParticleGravity: NextPage = () => {
           Particles Amount: {particlesAmount}
           <Slider
             min={10}
-            max={2000}
+            max={4000}
             step={1}
             value={particlesAmount}
             onChange={(_, value) =>

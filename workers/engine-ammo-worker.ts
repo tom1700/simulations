@@ -118,7 +118,7 @@ class EngineWorker {
             this.initializeBoundries(worldSize);
 
             this.particles = new Array(particlesAmount).fill(0).map(() => {
-                const colShape = new Ammo.btSphereShape(1);
+                const colShape = new Ammo.btSphereShape(RADIUS);
                 const startTransform = new Ammo.btTransform();
 
                 startTransform.setIdentity();
@@ -162,58 +162,6 @@ class EngineWorker {
                 })
             })
         });
-
-        // const stone = new CANNON.Material("stone");
-
-        // // plane -y
-        // const planeShapeYmin = new CANNON.Plane();
-        // const planeYmin = new CANNON.Body({ mass: 0, material: stone });
-        // planeYmin.addShape(planeShapeYmin);
-        // planeYmin.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
-        // planeYmin.position.set(0, -worldSize / 2, 0);
-        // world.addBody(planeYmin);
-
-        // // Plane +y
-        // const planeShapeYmax = new CANNON.Plane();
-        // const planeYmax = new CANNON.Body({ mass: 0, material: stone });
-        // planeYmax.addShape(planeShapeYmax);
-        // planeYmax.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), Math.PI / 2);
-        // planeYmax.position.set(0, worldSize / 2, 0);
-        // world.addBody(planeYmax);
-
-        // // plane -x
-        // const planeShapeXmin = new CANNON.Plane();
-        // const planeXmin = new CANNON.Body({ mass: 0, material: stone });
-        // planeXmin.addShape(planeShapeXmin);
-        // planeXmin.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), Math.PI / 2);
-        // planeXmin.position.set(-worldSize / 2, 0, 0);
-        // world.addBody(planeXmin);
-
-        // // Plane +x
-        // const planeShapeXmax = new CANNON.Plane();
-        // const planeXmax = new CANNON.Body({ mass: 0, material: stone });
-        // planeXmax.addShape(planeShapeXmax);
-        // planeXmax.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), -Math.PI / 2);
-        // planeXmax.position.set(worldSize / 2, 0, 0);
-        // world.addBody(planeXmax);
-
-        // // Plane -z
-        // const planeShapeZmin = new CANNON.Plane();
-        // const planeZmin = new CANNON.Body({ mass: 0, material: stone });
-        // planeZmin.addShape(planeShapeZmin);
-        // planeZmin.position.set(0, 0, -worldSize / 2);
-        // world.addBody(planeZmin);
-
-        // // Plane +z
-        // const planeShapeZmax = new CANNON.Plane();
-        // const planeZmax = new CANNON.Body({ mass: 0, material: stone });
-        // planeZmax.addShape(planeShapeZmax);
-        // planeZmax.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), Math.PI);
-        // planeZmax.position.set(0, 0, worldSize / 2);
-        // world.addBody(planeZmax);
-
-        // this.world = world;
-        // this.particles = particles;
     }
 
     sendUpdate() {
