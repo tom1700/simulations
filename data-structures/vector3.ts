@@ -144,4 +144,12 @@ export class Vector {
     toString() {
         return `{x:${this.x},y:${this.y},z:${this.z}}`
     }
+
+    serialize() {
+        return JSON.stringify({
+            x: this.x,
+            y: this.y,
+            z: this.z
+        })
+    }
 }

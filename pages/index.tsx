@@ -42,6 +42,7 @@ const Home: NextPage = () => {
           <b>VR Simulations</b>
         </Typography>
         <Link href={"/vr-scene"}>VR Scene</Link>
+        <Link href={"/vr-with-physics"}>VR Scene With Physics</Link>
       </Stack>
     </Container>
   );

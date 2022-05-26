@@ -112,7 +112,7 @@ const ParticleGravity: NextPage = () => {
 
   useEffect(() => {
     workerRef.current = new Worker(
-      new URL("../workers/engine-ammo-worker.ts", import.meta.url)
+      new URL("../workers/engine-ammo-worker-particles.ts", import.meta.url)
     );
 
     return () => {

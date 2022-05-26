@@ -53,6 +53,8 @@ const NaiveCube: NextPage = () => {
       subtitle={`Testing that Aframe works in my environemnt`}
       backLink="/"
       backLabel="< Home"
+      forwardLink="/vr-with-physics"
+      forwardLabel="VR With Physics >"
     >
       <Stack spacing={2} direction="row" style={{ flex: 1 }}>
         <Stack spacing={2} style={{ flex: 1 }}>
