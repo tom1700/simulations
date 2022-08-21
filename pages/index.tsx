@@ -35,6 +35,7 @@ const Home: NextPage = () => {
         <Link href={"/particle-collision-with-worker-ammo"}>
           Particle Collision Web Worker with ammo.js
         </Link>
+        <Link href={"/custom-particle-engine"}>Custom particle engine</Link>
       </Stack>
 
       <Stack spacing={2} style={{ marginTop: "4rem" }}>
