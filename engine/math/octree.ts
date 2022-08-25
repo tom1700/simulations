@@ -79,6 +79,11 @@ const bottomBackPlacements = [
     ChildPlacement.bottomLeftBack,
 ]
 
+const bottomFrontPlacements = [
+    ChildPlacement.bottomRightFront,
+    ChildPlacement.bottomLeftFront,
+]
+
 const leftFrontPlacements = [
     ChildPlacement.bottomLeftFront,
     ChildPlacement.topLeftFront,
@@ -93,6 +98,11 @@ const rightBackPlacements = [
     ChildPlacement.bottomRightBack,
     ChildPlacement.topRightBack,
 ];
+
+const rightFrontPlacements = [
+    ChildPlacement.bottomRightFront,
+    ChildPlacement.topRightFront,
+]
 
 const topRightPlacements = [ChildPlacement.topRightBack, ChildPlacement.topRightFront];
 
@@ -167,45 +177,65 @@ export const forEachNode = (
 }
 
 export const getPlacementsToCheck = (xInRange: boolean, yInRange: boolean, zInRange: boolean, direction: ChildPlacement) => {
+    const isOnTheRight = rightPlacements.includes(direction);
+    const isOnTheTop = topPlacements.includes(direction);
+    const isOnTheFront = frontPlacements.includes(direction);
+
     if (xInRange) {
         if (yInRange) {
             if (zInRange) {
                 return placements;
             }
 
-            if (frontPlacements.includes(direction)) return backPlacements;
+            if (isOnTheFront) return backPlacements;
 
             return frontPlacements;
         }
 
         if (zInRange) {
-            if (bottomPlacements.includes(direction)) return topPlacements;
+            if (isOnTheTop) return bottomPlacements;
 
-            return bottomPlacements;
+            return topPlacements;
         }
 
-        if (bottomPlacements.includes(direction)) return topBackPlacements;
+        if (isOnTheTop) {
+            if (isOnTheFront) return bottomBackPlacements;
 
-        return bottomBackPlacements;
+            return bottomFrontPlacements;
+        }
+
+        if (isOnTheFront) return topBackPlacements;
+
+        return topFrontPlacements;
     }
 
     if (yInRange) {
         if (zInRange) {
-            if (rightPlacements.includes(direction)) return leftPlacements;
+            if (isOnTheRight) return leftPlacements;
 
             return rightPlacements;
         }
 
-        if (frontPlacements.includes(direction)) return leftBackPlacements;
+        if (isOnTheFront) {
+            if (isOnTheRight) return leftBackPlacements;
+            return rightBackPlacements;
+        }
 
-        return rightBackPlacements;
+        if (isOnTheRight) return leftFrontPlacements;
+
+        return rightFrontPlacements;
     }
 
     if (zInRange) {
-        if (topRightPlacements.includes(direction)) return bottomLeftPlacements;
-        if (bottomRightPlacements.includes(direction)) return topLeftPlacements;
-        if (topLeftPlacements.includes(direction)) return bottomRightPlacements;
-        if (bottomLeftPlacements.includes(direction)) return topRightPlacements;
+        if (isOnTheRight) {
+            if (isOnTheTop) return bottomLeftPlacements;
+
+            return topLeftPlacements;
+        }
+
+        if (isOnTheTop) return bottomRightPlacements;
+
+        return topRightPlacements;
     }
 
     return oppositePlacement[direction];
@@ -222,7 +252,6 @@ export const forNodesInDirectionInRange = (
     const xInRange = Math.abs(target.position.x - node.position.x) <= range;
     const yInRange = Math.abs(target.position.y - node.position.y) <= range;
     const zInRange = Math.abs(target.position.z - node.position.z) <= range;
-
     const placementsToCheck = getPlacementsToCheck(xInRange, yInRange, zInRange, direction);
 
     if (xInRange && yInRange && zInRange) {
