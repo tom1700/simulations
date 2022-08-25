@@ -97,8 +97,8 @@ const CustomParticleEngine: NextPage = () => {
   const renderer3D = useRef<Renderer3D>();
   const canvas = useRef<HTMLDivElement>(null);
   const fpsCounterRef = useRef<HTMLElement>(null);
-  const [worldSize, setWorldSize] = useState(10);
-  const [particlesAmount, setParticlesAmount] = useState(10);
+  const [worldSize, setWorldSize] = useState(100);
+  const [particlesAmount, setParticlesAmount] = useState(1000);
 
   const workerRef = useRef<Worker>();
 
@@ -166,7 +166,7 @@ const CustomParticleEngine: NextPage = () => {
           Particles Amount: {particlesAmount}
           <Slider
             min={10}
-            max={4000}
+            max={10000}
             step={1}
             value={particlesAmount}
             onChange={(_, value) =>
