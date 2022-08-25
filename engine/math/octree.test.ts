@@ -78,7 +78,7 @@ describe('octree', () => {
             })
         })
 
-        describe.only('when node has more descendants', () => {
+        describe('when node has more descendants', () => {
             it.each([
                 [{ x: -15, y: 5, z: 5, direction: 'topLeftFront' }, { x: -10, y: 4, z: 4, direction: 'bottomRightBack' }],
                 [{ x: -15, y: 5, z: 5, direction: 'topLeftFront' }, { x: -10, y: 6, z: 4, direction: 'topRightBack' }],
@@ -254,6 +254,67 @@ describe('octree', () => {
                 forEachNodeInRange(callback, root, 10);
 
                 expect(callback).toHaveBeenCalledWith(grandChild);
+                expect(callback).toHaveBeenCalledTimes(1);
+            });
+        });
+
+        describe('when node has a parent', () => {
+            it.each([
+                [-10, 10, 10, 'topLeftFront'],
+                [10, 10, 10, 'topRightFront'],
+                [10, -10, 10, 'bottomRightFront'],
+                [-10, -10, 10, 'bottomLeftFront'],
+                [-10, 10, -10, 'topLeftBack'],
+                [10, 10, -10, 'topRightBack'],
+                [10, -10, -10, 'bottomRightBack'],
+                [-10, -10, -10, 'bottomLeftBack'],
+            ])('it should call the callback when parent is in range (x: %f, y: %f, z: %f) position: %s', (x, y, z, placement) => {
+                const child: OctreeNode = { nodeId: 1, position: { x, y, z }, children: {} };
+                const parent = {
+                    nodeId: 0, position: { x: 0, y: 0, z: 0 }, children: {
+                        [placement]: child
+                    }
+                };
+                child.parent = parent;
+
+                forEachNodeInRange(callback, child, 10);
+
+                expect(callback).toHaveBeenCalledWith(parent);
+                expect(callback).toHaveBeenCalledTimes(1);
+            })
+
+            it.each([
+                [{ x: -5, y: 15, z: 5, direction: 'topLeftFront' }, { x: 5, y: 15, z: 5, direction: 'topRightFront' }],
+                [{ x: 5, y: 15, z: 5, direction: 'topRightFront' }, { x: -5, y: 15, z: 5, direction: 'topLeftFront' }],
+                [{ x: -5, y: 5, z: 15, direction: 'topLeftFront' }, { x: 5, y: 5, z: 15, direction: 'topRightFront' }],
+                [{ x: 5, y: 5, z: 15, direction: 'topRightFront' }, { x: -5, y: 5, z: 15, direction: 'topLeftFront' }],
+                [{ x: -5, y: 15, z: 15, direction: 'topLeftFront' }, { x: 5, y: 15, z: 15, direction: 'topRightFront' }],
+                [{ x: 5, y: 15, z: 15, direction: 'topRightFront' }, { x: -5, y: 15, z: 15, direction: 'topLeftFront' }],
+
+                [{ x: -5, y: -15, z: 5, direction: 'bottomLeftFront' }, { x: 5, y: -15, z: 5, direction: 'bottomRightFront' }],
+                [{ x: 5, y: -15, z: 5, direction: 'bottomRightFront' }, { x: -5, y: -15, z: 5, direction: 'bottomLeftFront' }],
+                [{ x: -5, y: -5, z: 15, direction: 'bottomLeftFront' }, { x: 5, y: -5, z: 15, direction: 'bottomRightFront' }],
+                [{ x: 5, y: -5, z: 15, direction: 'bottomRightFront' }, { x: -5, y: -5, z: 15, direction: 'bottomLeftFront' }],
+                [{ x: -5, y: -15, z: 15, direction: 'bottomLeftFront' }, { x: 5, y: -15, z: 15, direction: 'bottomRightFront' }],
+                [{ x: 5, y: -15, z: 15, direction: 'bottomRightFront' }, { x: -5, y: -15, z: 15, direction: 'bottomLeftFront' }],
+
+
+            ])('it should call callback when another child of the parent is in range %#', (child1Data, child2Data) => {
+                const child1: OctreeNode = { nodeId: 2, position: { x: child1Data.x, y: child1Data.y, z: child1Data.z }, children: {} };
+                const child2: OctreeNode = { nodeId: 1, position: { x: child2Data.x, y: child2Data.y, z: child2Data.z }, children: {} };
+                const root = {
+                    nodeId: 0, position: { x: 0, y: 0, z: 0 }, children: {
+                        [child1Data.direction]: child1,
+                        [child2Data.direction]: child2,
+                    }
+                };
+
+                child1.parent = root;
+                child2.parent = root;
+
+                forEachNodeInRange(callback, child1, 10);
+
+                expect(callback).toHaveBeenCalledWith(child2);
                 expect(callback).toHaveBeenCalledTimes(1);
             });
         })
