@@ -1,7 +1,7 @@
-import { forEachNodeInRange, OctreeNode } from './octree';
+import { forEachNodePairs, OctreeNode } from './octree';
 
 describe('octree', () => {
-    describe('forEachNodeInRange', () => {
+    describe('forEachNodePairs', () => {
         let callback = jest.fn();
 
         beforeEach(() => {
@@ -10,7 +10,7 @@ describe('octree', () => {
 
 
         it('should do nothing if the node has no children', () => {
-            forEachNodeInRange(callback, { nodeId: 0, position: { x: 0, y: 0, z: 0 }, children: {} }, 10);
+            forEachNodePairs(callback, { nodeId: 0, position: { x: 0, y: 0, z: 0 }, children: {} }, 10);
             expect(callback).not.toHaveBeenCalled();
         });
 
@@ -48,7 +48,7 @@ describe('octree', () => {
                     }
                 };
                 child.parent = parent;
-                forEachNodeInRange(callback, parent, 10);
+                forEachNodePairs(callback, parent, 10);
 
                 expect(callback).not.toHaveBeenCalled();
             });
@@ -71,7 +71,7 @@ describe('octree', () => {
                 };
                 child.parent = parent;
 
-                forEachNodeInRange(callback, parent, 10);
+                forEachNodePairs(callback, parent, 10);
 
                 expect(callback).toHaveBeenCalledWith(child);
                 expect(callback).toHaveBeenCalledTimes(1);
@@ -251,7 +251,7 @@ describe('octree', () => {
                 grandChild.parent = child;
                 child.parent = root;
 
-                forEachNodeInRange(callback, root, 10);
+                forEachNodePairs(callback, root, 10);
 
                 expect(callback).toHaveBeenCalledWith(grandChild);
                 expect(callback).toHaveBeenCalledTimes(1);
@@ -277,7 +277,7 @@ describe('octree', () => {
                 };
                 child.parent = parent;
 
-                forEachNodeInRange(callback, child, 10);
+                forEachNodePairs(callback, child, 10);
 
                 expect(callback).toHaveBeenCalledWith(parent);
                 expect(callback).toHaveBeenCalledTimes(1);
@@ -312,7 +312,7 @@ describe('octree', () => {
                 child1.parent = root;
                 child2.parent = root;
 
-                forEachNodeInRange(callback, child1, 10);
+                forEachNodePairs(callback, child1, 10);
 
                 expect(callback).toHaveBeenCalledWith(child2);
                 expect(callback).toHaveBeenCalledTimes(1);

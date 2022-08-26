@@ -151,7 +151,7 @@ export const addNode = (root: OctreeNode, node: OctreeNode) => {
 }
 
 export const unbindNodes = (node: OctreeNode) => {
-    node.parent = undefined;;
+    node.parent = undefined;
 
     for (let placement of placements) {
         const child = node.children[placement];
@@ -241,8 +241,8 @@ export const getPlacementsToCheck = (xInRange: boolean, yInRange: boolean, zInRa
     return oppositePlacement[direction];
 }
 
-export const forNodesInDirectionInRange = (
-    callback: (node: OctreeNode) => void,
+const forNodesInDirectionInRange = (
+    callback: (node1: OctreeNode, node2: OctreeNode) => void,
     target: OctreeNode,
     node: OctreeNode,
     direction: ChildPlacement,
@@ -255,7 +255,7 @@ export const forNodesInDirectionInRange = (
     const placementsToCheck = getPlacementsToCheck(xInRange, yInRange, zInRange, direction);
 
     if (xInRange && yInRange && zInRange) {
-        callback(node);
+        callback(target, node);
     }
 
     placementsToCheck?.forEach(placement => {
@@ -267,8 +267,8 @@ export const forNodesInDirectionInRange = (
     })
 }
 
-export const forEachNodeInRange = (
-    callback: (node: OctreeNode) => void,
+const forEachChildNodeInRange = (
+    callback: (node1: OctreeNode, node2: OctreeNode) => void,
     node: OctreeNode,
     range: number
 ) => {
@@ -279,15 +279,29 @@ export const forEachNodeInRange = (
             forNodesInDirectionInRange(callback, node, child, placement, range);
         }
     }
+}
 
-    const parent = node.parent;
+export const forEachNodePairs = (callback: (node1: OctreeNode, node2: OctreeNode) => void,
+    root: OctreeNode,
+    range: number) => {
+    forEachChildNodeInRange(callback, root, range);
 
-    if (!parent) return;
+    for (let i = 0; i < placements.length; i++) {
+        const child = root.children[placements[i]];
 
-    const parentPlacement = placements.find(placement => conditions[placement](node.position, parent.position))
+        if (!child) continue;
 
-    if (!parentPlacement) return;
+        forEachNodePairs(callback, child, range);
 
-    // The issue is that the callback is probably called twice for some nodes
-    forNodesInDirectionInRange(callback, node, parent, parentPlacement, range);
+        for (let j = i + 1; j < placements.length; j++) {
+            const sibling = root.children[placements[i]];
+            if (!sibling) continue;
+
+            const siblingRelativePlacement = placements.find(placement => conditions[placement](child.position, sibling.position));
+
+            if (!siblingRelativePlacement) continue;
+
+            forNodesInDirectionInRange(callback, child, sibling, siblingRelativePlacement, range);
+        }
+    }
 }

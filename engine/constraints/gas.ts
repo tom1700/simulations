@@ -10,7 +10,7 @@ const accelerationVector: Vector3 = { x: 0, y: 0, z: 0 };
 // Particles don't want to be too close to each other
 export const gasConstraint = (particle1: Particle, particle2: Particle, repellingFactor = 1, time: number) => {
   const distance = getDistance(particle1.position, particle2.position);
-  const repellingValue = Math.min(Math.max(0, multiplicativeInverseFunction(repellingFactor, -1, distance)), 100);
+  const repellingValue = Math.min(Math.max(0, multiplicativeInverseFunction(repellingFactor, -1, distance)), 1000);
 
   getVectorBetweenPoints(particle1.position, particle2.position, directionVector);
   normalizeMutate(directionVector);
