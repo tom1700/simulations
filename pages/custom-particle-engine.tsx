@@ -98,7 +98,7 @@ const CustomParticleEngine: NextPage = () => {
   const canvas = useRef<HTMLDivElement>(null);
   const fpsCounterRef = useRef<HTMLElement>(null);
   const [worldSize, setWorldSize] = useState(100);
-  const [particlesAmount, setParticlesAmount] = useState(1000);
+  const [particlesAmount, setParticlesAmount] = useState(20000);
 
   const workerRef = useRef<Worker>();
 
@@ -149,7 +149,11 @@ const CustomParticleEngine: NextPage = () => {
       backLink="/particle-collision-with-worker-ammo"
       backLabel="< Particle Collision with worker and ammo engine"
     >
-      <Typography component={"p"}></Typography>
+      <Typography component={"p"}>
+        A custom particle engine. In this case it is supposed to be the gas
+        particles simulation. On one hand the gravity is pulling them downward.
+        On the other hand they are repelling each other.
+      </Typography>
       <Stack spacing={2} direction="row" style={{ flex: 1 }}>
         <div style={{ flex: 2 }} ref={canvas}></div>
         <Stack spacing={2} style={{ flex: 1 }}>

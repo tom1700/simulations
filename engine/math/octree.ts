@@ -183,7 +183,8 @@ const conditions: Record<
 };
 
 export const addNode = (root: OctreeNode, node: OctreeNode) => {
-  for (let placement of placements) {
+  for (let i = 0; i < placements.length; i++) {
+    const placement = placements[i];
     if (conditions[placement](root.position, node.position)) {
       const child = root.children[placement];
 
@@ -201,25 +202,12 @@ export const addNode = (root: OctreeNode, node: OctreeNode) => {
 export const unbindNodes = (node: OctreeNode) => {
   node.parent = undefined;
 
-  for (let placement of placements) {
+  for (let i = 0; i < placements.length; i++) {
+    const placement = placements[i];
     const child = node.children[placement];
     if (child) {
       unbindNodes(child);
       node.children[placement] = undefined;
-    }
-  }
-};
-
-export const forEachNode = (
-  callback: (node: OctreeNode) => void,
-  node: OctreeNode
-) => {
-  callback(node);
-
-  for (let placement of placements) {
-    const child = node.children[placement];
-    if (child) {
-      forEachNode(callback, child);
     }
   }
 };
@@ -316,13 +304,14 @@ const forNodesInDirectionInRange = (
     callback(target, node);
   }
 
-  placementsToCheck?.forEach((placement) => {
+  for (let i = 0; i < placementsToCheck.length; i++) {
+    const placement = placementsToCheck[i];
     const child = node.children[placement];
 
     if (child) {
       forNodesInDirectionInRange(callback, target, child, direction, range);
     }
-  });
+  }
 };
 
 const forEachChildNodeInRange = (
