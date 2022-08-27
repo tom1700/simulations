@@ -39,7 +39,9 @@ class Renderer3D {
       this.idIndexMap[particle.id] = index;
 
       const geometry = new THREE.SphereGeometry(RADIUS, 8, 6);
-      const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+      const material = new THREE.MeshBasicMaterial({
+        color: `rgb(${Math.max(Math.floor(255 / particle.mass), 0)}, 0, 0)`,
+      });
       const sphere = new THREE.Mesh(geometry, material);
       sphere.position.set(
         particle.position.x - this.worldSize / 2,

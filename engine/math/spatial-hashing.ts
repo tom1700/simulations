@@ -1,4 +1,5 @@
 import { Vector3 } from "../interfaces/vector3";
+import { getDistance } from "./vector3";
 
 interface LinkedListHead {
   next: LinkedListNode | null;
@@ -6,6 +7,7 @@ interface LinkedListHead {
 
 export interface LinkedListNode {
   nodeId: number;
+  position: Vector3;
   next: LinkedListNode | null;
 }
 
@@ -56,14 +58,10 @@ export const buildGrid = (worldSize: number, spacing: number): SpatialGrid => {
   };
 };
 
-export const addNode = (
-  grid: SpatialGrid,
-  node: LinkedListNode,
-  position: Vector3
-) => {
+export const addNode = (grid: SpatialGrid, node: LinkedListNode) => {
   const { size, cells, spacing } = grid;
 
-  const index = positionToGridIndex(position, size, spacing);
+  const index = positionToGridIndex(node.position, size, spacing);
 
   // Rouge particle
   if (index > grid.cells.length - 1 || index < 0) return;
@@ -114,40 +112,46 @@ export const forEachNodeNeighbourWithinRange = (
 ) => {
   const neighboursDepthToCheck = Math.ceil(distance / grid.spacing);
 
+  const callIfInRange = (node: LinkedListNode, neighbour: LinkedListNode) => {
+    if (getDistance(node.position, neighbour.position) <= distance) {
+      callback(node, neighbour);
+    }
+  };
+
   for (let i = 0; i < grid.cells.length; i++) {
     const head = grid.cells[i];
-    let node = head.next;
 
-    while (node) {
-      let index = i;
+    let index = i;
+    const x = Math.floor(index / (grid.size * grid.size));
+    index -= x * grid.size * grid.size;
+    const y = Math.floor(index / grid.size);
+    const z = index % grid.size;
 
-      const x = Math.floor(index / (grid.size * grid.size));
-      index -= x * grid.size * grid.size;
-      const y = Math.floor(index / grid.size);
-      const z = index % grid.size;
-
+    for (
+      let nx = Math.max(x - neighboursDepthToCheck, 0);
+      nx < Math.min(x + neighboursDepthToCheck, grid.size);
+      nx++
+    ) {
       for (
-        let nx = Math.max(x - neighboursDepthToCheck, 0);
-        nx < Math.min(x + neighboursDepthToCheck, grid.size);
-        nx++
+        let ny = Math.max(y - neighboursDepthToCheck, 0);
+        ny < Math.min(y + neighboursDepthToCheck, grid.size);
+        ny++
       ) {
         for (
-          let ny = Math.max(y - neighboursDepthToCheck, 0);
-          ny < Math.min(y + neighboursDepthToCheck, grid.size);
-          ny++
+          let nz = Math.max(z - neighboursDepthToCheck, 0);
+          nz < Math.min(z + neighboursDepthToCheck, grid.size);
+          nz++
         ) {
-          for (
-            let nz = Math.max(z - neighboursDepthToCheck, 0);
-            nz < Math.min(z + neighboursDepthToCheck, grid.size);
-            nz++
-          ) {
+          let node = head.next;
+
+          while (node) {
             const i2 = to1D(x, y, z, grid.size, grid.size);
             const head2 = grid.cells[i2];
-            forEachNodeInCellExceptTarget(callback, head2, node);
+            forEachNodeInCellExceptTarget(callIfInRange, head2, node);
+            node = node.next;
           }
         }
       }
-      node = node.next;
     }
   }
 };

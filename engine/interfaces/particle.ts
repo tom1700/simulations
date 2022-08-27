@@ -5,4 +5,5 @@ export interface Particle {
   id: ID;
   position: Vector3;
   velocity: Vector3;
+  mass: number;
 }

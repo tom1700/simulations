@@ -29,9 +29,7 @@ export const runSimulationStep = (
   console.time("step");
 
   for (let i = 0; i < nodeList.length; i++) {
-    const node = nodeList[i];
-    const position = particleMap[node.nodeId].position;
-    addNode(spatialGrid, nodeList[i], position);
+    addNode(spatialGrid, nodeList[i]);
   }
 
   forEachNodeNeighbourWithinRange(

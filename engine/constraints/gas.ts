@@ -55,15 +55,18 @@ export const gasConstraintSingle = (
     1000
   );
 
+  const massRatio = particle2.mass / (particle2.mass + particle1.mass);
+
   getVectorBetweenPoints(
     particle1.position,
     particle2.position,
     directionVector
   );
+
   normalizeMutate(directionVector);
 
   copyInto(directionVector, accelerationVector);
-  multiplyByScalarMutate(accelerationVector, -repellingValue);
+  multiplyByScalarMutate(accelerationVector, -1 * repellingValue * massRatio);
 
   applyAcceleration(particle1, accelerationVector, time);
 };

@@ -15,6 +15,7 @@ export const runSimulation = (
 
   const nodes: LinkedListNode[] = particles.map((particle) => ({
     nodeId: particle.id,
+    position: particle.position,
     next: null,
   }));
 

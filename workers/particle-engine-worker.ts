@@ -15,14 +15,15 @@ class EngineWorker {
         position: {
           x: getRandomValueWithinBounds(0, worldSize),
           y: getRandomValueWithinBounds(0, worldSize),
-          z: getRandomValueWithinBounds(0, worldSize)
+          z: getRandomValueWithinBounds(0, worldSize),
         },
         velocity: {
           x: getRandomValueWithinBounds(-2, 2),
           y: getRandomValueWithinBounds(-2, 2),
-          z: getRandomValueWithinBounds(-2, 2)
-        }
-      }
+          z: getRandomValueWithinBounds(-2, 2),
+        },
+        mass: getRandomValueWithinBounds(1, 10),
+      };
 
       return particle;
     });
@@ -31,20 +32,20 @@ class EngineWorker {
   start() {
     runSimulation(this.particles, this.worldSize, () => {
       postMessage(this.particles);
-    })
+    });
   }
 }
 
 const engine = new EngineWorker();
 
-addEventListener('message', (event) => {
+addEventListener("message", (event) => {
   const data: WorkerIncomingMessage = event.data;
 
-  if (data.type === 'INITIALIZE') {
+  if (data.type === "INITIALIZE") {
     const { worldSize, particlesAmount } = event.data;
-    engine.initEngine(worldSize, particlesAmount)
+    engine.initEngine(worldSize, particlesAmount);
   }
-  if (data.type === 'START') {
+  if (data.type === "START") {
     engine.start();
   }
-})
+});
