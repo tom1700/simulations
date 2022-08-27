@@ -1,3 +1,5 @@
+import { Particle } from "../interfaces/particle";
+import { ID } from "../interfaces/primitives";
 import { Vector3 } from "../interfaces/vector3";
 import { getDistance } from "./vector3";
 
@@ -17,7 +19,7 @@ export type SpatialGrid = {
   spacing: number;
 };
 
-const to1D = (
+export const to1D = (
   x: number,
   y: number,
   z: number,
@@ -90,7 +92,7 @@ export const resetGrid = (grid: SpatialGrid) => {
   });
 };
 
-const forEachNodeInCellExceptTarget = (
+export const forEachNodeInCellExceptTarget = (
   callback: (node: LinkedListNode, neighbour: LinkedListNode) => void,
   head: LinkedListHead,
   target: LinkedListNode
@@ -103,6 +105,56 @@ const forEachNodeInCellExceptTarget = (
     }
     node = node.next;
   }
+};
+
+export const getParticlesAndNeighbours = (
+  particleMap: Record<ID, Particle>,
+  grid: SpatialGrid,
+  distance: number,
+  index: number
+) => {
+  const particles = [];
+  const neighbours = [];
+
+  const neighboursDepthToCheck = Math.ceil(distance / grid.spacing);
+
+  let i = index;
+  const x = Math.floor(i / (grid.size * grid.size));
+  i -= x * grid.size * grid.size;
+  const y = Math.floor(i / grid.size);
+  const z = i % grid.size;
+
+  for (
+    let nx = Math.max(x - neighboursDepthToCheck, 0);
+    nx < Math.min(x + neighboursDepthToCheck, grid.size);
+    nx++
+  ) {
+    for (
+      let ny = Math.max(y - neighboursDepthToCheck, 0);
+      ny < Math.min(y + neighboursDepthToCheck, grid.size);
+      ny++
+    ) {
+      for (
+        let nz = Math.max(z - neighboursDepthToCheck, 0);
+        nz < Math.min(z + neighboursDepthToCheck, grid.size);
+        nz++
+      ) {
+        const head = grid.cells[to1D(nx, ny, nz, grid.size, grid.size)];
+        let node = head.next;
+
+        while (node) {
+          if (nx === x && ny === y && nz === z) {
+            particles.push(particleMap[node.nodeId]);
+          } else {
+            neighbours.push(particleMap[node.nodeId]);
+          }
+          node = node.next;
+        }
+      }
+    }
+  }
+
+  return { particles, neighbours };
 };
 
 export const forEachNodeNeighbourWithinRange = (

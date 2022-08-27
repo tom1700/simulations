@@ -172,7 +172,7 @@ const CustomParticleEngine: NextPage = () => {
           Particles Amount: {particlesAmount}
           <Slider
             min={10}
-            max={20000}
+            max={30000}
             step={1}
             value={particlesAmount}
             onChange={(_, value) =>
