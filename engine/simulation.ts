@@ -6,22 +6,25 @@ import { Vector3 } from "./interfaces/vector3";
 import {
   addNode,
   forEachNodeNeighbourWithinRange,
+  getParticlesAndNeighbours,
   LinkedListNode,
   resetGrid,
   SpatialGrid,
 } from "./math/spatial-hashing";
 import { applyAcceleration } from "./physics/apply-acceleration";
 import { applyVelocity } from "./physics/apply-velocity";
+import { WorkersScheduler } from "./workers-scheduler";
 
 const gravity: Vector3 = { x: 0, y: -9.8, z: 0 };
 const GAS_INTERACTION_DISTANCE = 10;
 
-export const runSimulationStep = (
+export const runSimulationStep = async (
   particleMap: Record<ID, Particle>,
   nodeList: LinkedListNode[],
   spatialGrid: SpatialGrid,
   worldSize: number,
-  dt: number
+  dt: number,
+  workScheduler: WorkersScheduler
 ) => {
   // 20000 particles - 78ms
   // 20000 particles no gas constraint - 32ms
@@ -32,20 +35,40 @@ export const runSimulationStep = (
     addNode(spatialGrid, nodeList[i]);
   }
 
-  forEachNodeNeighbourWithinRange(
-    (node1, node2) => {
-      const particle1 = particleMap[node1.nodeId];
-      const particle2 = particleMap[node2.nodeId];
-      gasConstraintSingle(
-        particle1,
-        particle2,
-        GAS_INTERACTION_DISTANCE + 1,
-        dt
-      );
-    },
-    spatialGrid,
-    GAS_INTERACTION_DISTANCE
-  );
+  for (let i = 0; i < spatialGrid.cells.length; i++) {
+    const { particles, neighbours } = getParticlesAndNeighbours(
+      particleMap,
+      spatialGrid,
+      GAS_INTERACTION_DISTANCE,
+      i
+    );
+
+    workScheduler.scheduleTask(
+      (worker) =>
+        new Promise<void>((res) => {
+          const onMessage = (event: MessageEvent<any>) => {
+            worker.removeEventListener("message", onMessage);
+            const particles: Particle[] = event.data.particles;
+
+            particles.forEach((particle) => {
+              particleMap[particle.id].velocity = particle.velocity;
+            });
+            res();
+          };
+
+          worker.addEventListener("message", onMessage);
+
+          worker.postMessage({
+            particles,
+            neighbouringParticles: neighbours,
+            distance: GAS_INTERACTION_DISTANCE,
+            dt,
+          });
+        })
+    );
+  }
+
+  await workScheduler.run();
 
   nodeList.forEach((node) => {
     const particle1 = particleMap[node.nodeId];
