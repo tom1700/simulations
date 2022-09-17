@@ -1,6 +1,5 @@
 import { Particle } from "./interfaces/particle";
-import { OctreeNode } from "./math/octree";
-import { buildGrid, LinkedListNode } from "./math/spatial-hashing";
+import { buildGrid } from "./physics/spatial-hashing";
 import { runSimulationStep } from "./simulation";
 
 export const runSimulation = (
@@ -13,12 +12,6 @@ export const runSimulation = (
     particles.map((particle) => [particle.id, particle])
   );
 
-  const nodes: LinkedListNode[] = particles.map((particle) => ({
-    nodeId: particle.id,
-    position: particle.position,
-    next: null,
-  }));
-
   const grid = buildGrid(worldSize, 10);
 
   const step = () => {
@@ -26,7 +19,7 @@ export const runSimulation = (
 
     runSimulationStep(
       particleMap,
-      nodes,
+      particles,
       grid,
       worldSize,
       (currentTime - prevTime) / 1000

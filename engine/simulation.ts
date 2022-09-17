@@ -1,15 +1,14 @@
-import { gasConstraint, gasConstraintSingle } from "./constraints/gas";
+import { gasConstraintSingle } from "./constraints/gas";
 import { worldConstraint } from "./constraints/world";
 import { Particle } from "./interfaces/particle";
 import { ID } from "./interfaces/primitives";
 import { Vector3 } from "./interfaces/vector3";
 import {
-  addNode,
-  forEachNodeNeighbourWithinRange,
-  LinkedListNode,
+  addParticle,
+  forEachParticleNeighbourWithinRange,
   resetGrid,
   SpatialGrid,
-} from "./math/spatial-hashing";
+} from "./physics/spatial-hashing";
 import { applyAcceleration } from "./physics/apply-acceleration";
 import { applyVelocity } from "./physics/apply-velocity";
 
@@ -18,7 +17,7 @@ const GAS_INTERACTION_DISTANCE = 10;
 
 export const runSimulationStep = (
   particleMap: Record<ID, Particle>,
-  nodeList: LinkedListNode[],
+  particles: Particle[],
   spatialGrid: SpatialGrid,
   worldSize: number,
   dt: number
@@ -28,14 +27,14 @@ export const runSimulationStep = (
   // For 20000 particles tree creation alone is 24ms
   console.time("step");
 
-  for (let i = 0; i < nodeList.length; i++) {
-    addNode(spatialGrid, nodeList[i]);
+  for (let i = 0; i < particles.length; i++) {
+    addParticle(spatialGrid, particles[i]);
   }
 
-  forEachNodeNeighbourWithinRange(
-    (node1, node2) => {
-      const particle1 = particleMap[node1.nodeId];
-      const particle2 = particleMap[node2.nodeId];
+  forEachParticleNeighbourWithinRange(
+    (particle1Id, particle2Id) => {
+      const particle1 = particleMap[particle1Id];
+      const particle2 = particleMap[particle2Id];
       gasConstraintSingle(
         particle1,
         particle2,
@@ -44,17 +43,16 @@ export const runSimulationStep = (
       );
     },
     spatialGrid,
+    particleMap,
     GAS_INTERACTION_DISTANCE
   );
 
-  nodeList.forEach((node) => {
-    const particle1 = particleMap[node.nodeId];
+  particles.forEach((particle) => {
+    applyAcceleration(particle, gravity, dt);
 
-    applyAcceleration(particle1, gravity, dt);
+    worldConstraint(particle, worldSize);
 
-    worldConstraint(particle1, worldSize);
-
-    applyVelocity(particle1, dt);
+    applyVelocity(particle, dt);
   });
 
   resetGrid(spatialGrid);

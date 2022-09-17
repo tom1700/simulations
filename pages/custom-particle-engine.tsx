@@ -100,7 +100,7 @@ const CustomParticleEngine: NextPage = () => {
   const canvas = useRef<HTMLDivElement>(null);
   const fpsCounterRef = useRef<HTMLElement>(null);
   const [worldSize, setWorldSize] = useState(100);
-  const [particlesAmount, setParticlesAmount] = useState(20000);
+  const [particlesAmount, setParticlesAmount] = useState(1000);
 
   const workerRef = useRef<Worker>();
 
