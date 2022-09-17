@@ -7,3 +7,9 @@ export interface Particle {
   velocity: Vector3;
   mass: number;
 }
+
+export enum ParticleType {
+  gas,
+  liquid,
+  solid,
+}

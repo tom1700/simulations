@@ -11,15 +11,15 @@ class EngineWorker {
     this.worldSize = worldSize;
     this.particles = new Array(particlesAmount).fill(0).map((_, index) => {
       const particle: Particle = {
-        id: index,
+        id: index + 1,
         position: {
           x: getRandomValueWithinBounds(0, worldSize),
-          y: getRandomValueWithinBounds(0, worldSize),
+          y: getRandomValueWithinBounds(0, 1),
           z: getRandomValueWithinBounds(0, worldSize),
         },
         velocity: {
           x: getRandomValueWithinBounds(-2, 2),
-          y: getRandomValueWithinBounds(-2, 2),
+          y: 0,
           z: getRandomValueWithinBounds(-2, 2),
         },
         mass: getRandomValueWithinBounds(1, 10),

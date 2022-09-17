@@ -2,6 +2,7 @@ import { Particle } from "../interfaces/particle";
 import { ID } from "../interfaces/primitives";
 import { Vector3 } from "../interfaces/vector3";
 import { getDistance } from "../math/vector3";
+import { ParticleLens } from "./particle-lens";
 
 export type SpatialGrid = {
   size: number;
@@ -24,16 +25,18 @@ const cordToIndex = (position: number, spacing: number) =>
   Math.floor(position / spacing);
 
 const positionToGridIndex = (
-  position: Vector3,
+  x: number,
+  y: number,
+  z: number,
   size: number,
   spacing: number,
   maxParticlesPerCell: number
 ) => {
-  const x = cordToIndex(position.x, spacing);
-  const y = cordToIndex(position.y, spacing);
-  const z = cordToIndex(position.z, spacing);
+  const gridX = cordToIndex(x, spacing);
+  const gridY = cordToIndex(y, spacing);
+  const gridZ = cordToIndex(z, spacing);
 
-  return to1D(x, y, z, size, size) * maxParticlesPerCell;
+  return to1D(gridX, gridY, gridZ, size, size) * maxParticlesPerCell;
 };
 
 export const buildGrid = (worldSize: number, spacing: number): SpatialGrid => {
@@ -53,11 +56,19 @@ export const buildGrid = (worldSize: number, spacing: number): SpatialGrid => {
   };
 };
 
-export const addParticle = (grid: SpatialGrid, particle: Particle) => {
+export const addParticle = (
+  grid: SpatialGrid,
+  particleX: number,
+  particleY: number,
+  particleZ: number,
+  particleId: number
+) => {
   const { size, cells, spacing, maxParticlesPerCell } = grid;
 
   const index = positionToGridIndex(
-    particle.position,
+    particleX,
+    particleY,
+    particleZ,
     size,
     spacing,
     maxParticlesPerCell
@@ -68,7 +79,7 @@ export const addParticle = (grid: SpatialGrid, particle: Particle) => {
 
   for (let i = index; i < index + maxParticlesPerCell; i++) {
     if (!cells[i]) {
-      cells[i] = particle.id;
+      cells[i] = particleId;
       return;
     }
   }
@@ -96,6 +107,8 @@ const forEachParticleInCellExceptTarget = (
   }
 };
 
+const nodePosition = { x: 0, y: 0, z: 0 };
+const neighbourPosition = { x: 0, y: 0, z: 0 };
 export const forEachParticleNeighbourWithinRange = (
   callback: (
     nodeId: number,
@@ -103,19 +116,25 @@ export const forEachParticleNeighbourWithinRange = (
     distanceBetween: number
   ) => void,
   grid: SpatialGrid,
-  particleMap: Record<ID, Particle>,
+  particleMap: Float32Array,
   distance: number
 ) => {
   const { cells, maxParticlesPerCell } = grid;
   const neighboursDepthToCheck = Math.ceil(distance / grid.spacing);
 
-  const callIfInRange = (nodeId: number, neighbourId: number) => {
-    const nodePosition = particleMap[nodeId].position;
-    const neighbourPosition = particleMap[neighbourId].position;
+  const callIfInRange = (particleId: number, neighbourId: number) => {
+    nodePosition.x = ParticleLens.getPositionX(particleId, particleMap);
+    nodePosition.y = ParticleLens.getPositionY(particleId, particleMap);
+    nodePosition.z = ParticleLens.getPositionZ(particleId, particleMap);
+
+    neighbourPosition.x = ParticleLens.getPositionX(neighbourId, particleMap);
+    neighbourPosition.y = ParticleLens.getPositionY(neighbourId, particleMap);
+    neighbourPosition.z = ParticleLens.getPositionZ(neighbourId, particleMap);
+
     const distanceBetween = getDistance(nodePosition, neighbourPosition);
 
     if (distanceBetween <= distance) {
-      callback(nodeId, neighbourId, distanceBetween);
+      callback(particleId, neighbourId, distanceBetween);
     }
   };
 
