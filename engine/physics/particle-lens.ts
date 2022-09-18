@@ -12,6 +12,9 @@ export const ParticleLens = {
   getIdForIndex(index: number) {
     return Math.floor(index / this.length);
   },
+  getCount(particleMap: Float32Array) {
+    return particleMap.length / this.length;
+  },
 
   getPositionX(particleId: number, particleMap: Float32Array) {
     return particleMap[particleId * this.length + this.positionX];
@@ -76,5 +79,22 @@ export const ParticleLens = {
 
       callback(id);
     }
+  },
+
+  map(
+    callback: (particleId: number, index: number) => void,
+    particleMap: Float32Array
+  ) {
+    const array = new Array(this.getCount(particleMap));
+    for (
+      let i = ParticleLens.length;
+      i < particleMap.length;
+      i += ParticleLens.length
+    ) {
+      const id = ParticleLens.getIdForIndex(i);
+
+      array[id - 1] = callback(id, id - 1);
+    }
+    return array;
   },
 };

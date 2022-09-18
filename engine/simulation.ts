@@ -3,6 +3,7 @@ import { worldConstraintV2 } from "./constraints/world";
 import { Vector3 } from "./interfaces/vector3";
 import {
   addParticle,
+  applyGasConstraints,
   forEachParticleNeighbourWithinRange,
   resetGrid,
   SpatialGrid,
@@ -10,15 +11,17 @@ import {
 import { applyAccelerationV2 } from "./physics/apply-acceleration";
 import { applyVelocityV2 } from "./physics/apply-velocity";
 import { ParticleLens } from "./physics/particle-lens";
+import { IKernelRunShortcut } from "gpu.js";
 
 const gravity: Vector3 = { x: 0, y: -9.8, z: 0 };
-const GAS_INTERACTION_DISTANCE = 5;
+export const GAS_INTERACTION_DISTANCE = 5;
 
 export const runSimulationStep = (
   particleMap: Float32Array,
   spatialGrid: SpatialGrid,
   worldSize: number,
-  dt: number
+  dt: number,
+  kernel: IKernelRunShortcut
 ) => {
   // 20000 particles - 78ms
   // 20000 particles no gas constraint - 32ms
@@ -33,14 +36,7 @@ export const runSimulationStep = (
     addParticle(spatialGrid, x, y, z, id);
   }, particleMap);
 
-  forEachParticleNeighbourWithinRange(
-    (particle1Id, particle2Id) => {
-      gasConstraintSingleV2(particle1Id, particle2Id, particleMap, dt);
-    },
-    spatialGrid,
-    particleMap,
-    GAS_INTERACTION_DISTANCE
-  );
+  applyGasConstraints(spatialGrid, particleMap, kernel, dt);
 
   ParticleLens.forEachParticle((id) => {
     applyAccelerationV2(id, particleMap, gravity, dt);

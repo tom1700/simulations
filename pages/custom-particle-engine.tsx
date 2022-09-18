@@ -6,18 +6,20 @@ import * as THREE from "three";
 import { createBasicScene } from "../utils/create-basic-scene";
 import { Page } from "../components/Page";
 import throttle from "lodash/throttle";
-import { Particle } from "../engine/interfaces/particle";
+import { ParticleLens } from "../engine/physics/particle-lens";
 
 const RADIUS = 0.5;
 
 const updateMeshPosition = (
   mesh: THREE.Mesh,
-  particle: Particle,
+  x: number,
+  y: number,
+  z: number,
   worldSize: number
 ) => {
-  mesh.position.x = particle.position.x - worldSize / 2;
-  mesh.position.y = particle.position.y - worldSize / 2;
-  mesh.position.z = particle.position.z - worldSize / 2;
+  mesh.position.x = x - worldSize / 2;
+  mesh.position.y = y - worldSize / 2;
+  mesh.position.z = z - worldSize / 2;
 };
 
 class Renderer3D {
@@ -34,41 +36,51 @@ class Renderer3D {
     this.onFPSUpdate = onFPSUpdate;
   }
 
-  private initializeMeshes(particles: Particle[]) {
-    this.sphereMeshes = particles.map((particle, index) => {
-      this.idIndexMap[particle.id] = index;
+  private initializeMeshes(particles: Float32Array) {
+    this.sphereMeshes = ParticleLens.map((particleId, index) => {
+      const positionX = ParticleLens.getPositionX(particleId, particles);
+      const positionY = ParticleLens.getPositionY(particleId, particles);
+      const positionZ = ParticleLens.getPositionZ(particleId, particles);
+      const mass = ParticleLens.getMass(particleId, particles);
+      this.idIndexMap[particleId] = index;
 
-      const geometry = new THREE.SphereGeometry(RADIUS, 8, 6);
+      const geometry = new THREE.SphereGeometry(RADIUS, 3, 2);
       const material = new THREE.MeshBasicMaterial({
-        color: `rgb(${Math.max(Math.floor(255 / particle.mass), 0)}, 0, 0)`,
+        color: `rgb(${Math.max(Math.floor(255 / mass), 0)}, 0, 0)`,
       });
       const sphere = new THREE.Mesh(geometry, material);
       sphere.position.set(
-        particle.position.x - this.worldSize / 2,
-        particle.position.y - this.worldSize / 2,
-        particle.position.z - this.worldSize / 2
+        positionX - this.worldSize / 2,
+        positionY - this.worldSize / 2,
+        positionZ - this.worldSize / 2
       );
 
       this.scene?.add(sphere);
 
       return sphere;
-    });
+    }, particles);
   }
 
-  update(particles: Particle[]) {
+  update(particles: Float32Array) {
     if (!this.isInitialized) {
       this.initializeMeshes(particles);
       this.isInitialized = true;
       return;
     }
 
-    particles.forEach((particle) => {
+    ParticleLens.forEachParticle((particleId) => {
+      const positionX = ParticleLens.getPositionX(particleId, particles);
+      const positionY = ParticleLens.getPositionY(particleId, particles);
+      const positionZ = ParticleLens.getPositionZ(particleId, particles);
+
       updateMeshPosition(
-        this.sphereMeshes[this.idIndexMap[particle.id]],
-        particle,
+        this.sphereMeshes[this.idIndexMap[particleId]],
+        positionX,
+        positionY,
+        positionZ,
         this.worldSize
       );
-    });
+    }, particles);
   }
 
   startAnimation(canvasElement: HTMLDivElement) {
@@ -172,7 +184,7 @@ const CustomParticleEngine: NextPage = () => {
           Particles Amount: {particlesAmount}
           <Slider
             min={10}
-            max={20000}
+            max={30000}
             step={1}
             value={particlesAmount}
             onChange={(_, value) =>
