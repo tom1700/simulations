@@ -1,8 +1,8 @@
-import { Particle } from "../interfaces/particle";
-import { ID } from "../interfaces/primitives";
-import { Vector3 } from "../interfaces/vector3";
 import { getDistance } from "../math/vector3";
 import { ParticleLens } from "./particle-lens";
+import { GPU, IKernelRunShortcut, Input } from "gpu.js";
+
+const gpu = new GPU();
 
 export type SpatialGrid = {
   size: number;
@@ -89,93 +89,217 @@ export const resetGrid = (grid: SpatialGrid) => {
   grid.cells.fill(0);
 };
 
-const forEachParticleInCellExceptTarget = (
-  callback: (nodeId: number, neighbourId: number) => void,
-  grid: SpatialGrid,
-  headIndex: number,
-  targetId: number
-) => {
-  const { cells, maxParticlesPerCell } = grid;
-
-  for (let i = headIndex; i < headIndex + maxParticlesPerCell; i++) {
-    if (!cells[i]) {
-      return;
-    }
-    if (cells[i] !== targetId) {
-      callback(cells[i], targetId);
-    }
-  }
-};
-
 const nodePosition = { x: 0, y: 0, z: 0 };
 const neighbourPosition = { x: 0, y: 0, z: 0 };
-export const forEachParticleNeighbourWithinRange = (
-  callback: (
-    nodeId: number,
-    neighbourId: number,
-    distanceBetween: number
-  ) => void,
-  grid: SpatialGrid,
+
+export const getKernel = (
   particleMap: Float32Array,
-  distance: number
+  grid: SpatialGrid,
+  neighboursDepthToCheck: number,
+  interactionDistance: number
 ) => {
-  const { cells, maxParticlesPerCell } = grid;
-  const neighboursDepthToCheck = Math.ceil(distance / grid.spacing);
+  function from3to1D(
+    x: number,
+    y: number,
+    z: number,
+    height: number,
+    depth: number
+  ) {
+    return (x * height + y) * depth + z;
+  }
 
-  const callIfInRange = (particleId: number, neighbourId: number) => {
-    nodePosition.x = ParticleLens.getPositionX(particleId, particleMap);
-    nodePosition.y = ParticleLens.getPositionY(particleId, particleMap);
-    nodePosition.z = ParticleLens.getPositionZ(particleId, particleMap);
+  function positionToGridIndex(
+    x: number,
+    y: number,
+    z: number,
+    size: number,
+    spacing: number,
+    maxParticlesPerCell: number
+  ) {
+    const gridX = Math.floor(x / spacing);
+    const gridY = Math.floor(y / spacing);
+    const gridZ = Math.floor(z / spacing);
 
-    neighbourPosition.x = ParticleLens.getPositionX(neighbourId, particleMap);
-    neighbourPosition.y = ParticleLens.getPositionY(neighbourId, particleMap);
-    neighbourPosition.z = ParticleLens.getPositionZ(neighbourId, particleMap);
+    return from3to1D(gridX, gridY, gridZ, size, size) * maxParticlesPerCell;
+  }
 
-    const distanceBetween = getDistance(nodePosition, neighbourPosition);
+  function getDistance(
+    x1: number,
+    y1: number,
+    z1: number,
+    x2: number,
+    y2: number,
+    z2: number
+  ) {
+    return Math.sqrt(
+      Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2) + Math.pow(z1 - z2, 2)
+    );
+  }
 
-    if (distanceBetween <= distance) {
-      callback(particleId, neighbourId, distanceBetween);
-    }
-  };
+  gpu.addFunction(from3to1D);
+  gpu.addFunction(positionToGridIndex);
+  gpu.addFunction(getDistance);
 
-  for (let i = 0; i < cells.length; i += maxParticlesPerCell) {
-    let index = i / maxParticlesPerCell;
-    const x = Math.floor(index / (grid.size * grid.size));
-    index -= x * grid.size * grid.size;
-    const y = Math.floor(index / grid.size);
-    const z = index % grid.size;
+  return gpu
+    .createKernel(function (
+      particleMap: number[],
+      hashGrid: number[],
+      dt: number
+    ) {
+      if (this.thread.x === 0) return [0.0, 0.0, 0.0];
 
-    for (let j = i; j < i + maxParticlesPerCell; j++) {
-      if (!cells[j]) {
-        break;
-      }
+      const particleId = this.thread.x;
+      const particleRowLength = this.constants.particleRowLength as number;
+      const velocityXIndex = this.constants.velocityXIndex as number;
+      const velocityYIndex = this.constants.velocityYIndex as number;
+      const velocityZIndex = this.constants.velocityZIndex as number;
+      const positionXIndex = this.constants.positionXIndex as number;
+      const positionYIndex = this.constants.positionYIndex as number;
+      const positionZIndex = this.constants.positionZIndex as number;
+      const massIndex = this.constants.massIndex as number;
+      const gridSize = this.constants.gridSize as number;
+      const gridSpacing = this.constants.gridSpacing as number;
+      const gridMaxParticlesPerCell = this.constants
+        .gridMaxParticlesPerCell as number;
+      const neighboursDepthToCheck = this.constants
+        .neighboursDepthToCheck as number;
+      const interactionDistance = this.constants.interactionDistance as number;
+
+      const rowStartIndex = this.thread.x * particleRowLength;
+
+      const positionX = particleMap[rowStartIndex + positionXIndex];
+      const positionY = particleMap[rowStartIndex + positionYIndex];
+      const positionZ = particleMap[rowStartIndex + positionZIndex];
+      let velocityX = particleMap[rowStartIndex + velocityXIndex];
+      let velocityY = particleMap[rowStartIndex + velocityYIndex];
+      let velocityZ = particleMap[rowStartIndex + velocityZIndex];
+      const mass = particleMap[rowStartIndex + massIndex];
+
+      const gridCellStartIndex = positionToGridIndex(
+        positionX,
+        positionY,
+        positionZ,
+        gridSize,
+        gridSpacing,
+        gridMaxParticlesPerCell
+      );
+
+      let index = gridCellStartIndex / gridMaxParticlesPerCell;
+      const x = Math.floor(index / (gridSize * gridSize));
+      index -= x * gridSize * gridSize;
+      const y = Math.floor(index / gridSize);
+      const z = index % gridSize;
 
       for (
         let nx = Math.max(x - neighboursDepthToCheck, 0);
-        nx < Math.min(x + neighboursDepthToCheck, grid.size);
+        nx < Math.min(x + neighboursDepthToCheck, gridSize);
         nx++
       ) {
         for (
           let ny = Math.max(y - neighboursDepthToCheck, 0);
-          ny < Math.min(y + neighboursDepthToCheck, grid.size);
+          ny < Math.min(y + neighboursDepthToCheck, gridSize);
           ny++
         ) {
           for (
             let nz = Math.max(z - neighboursDepthToCheck, 0);
-            nz < Math.min(z + neighboursDepthToCheck, grid.size);
+            nz < Math.min(z + neighboursDepthToCheck, gridSize);
             nz++
           ) {
-            const neighbourCellIndex =
-              to1D(nx, ny, nz, grid.size, grid.size) * maxParticlesPerCell;
-            forEachParticleInCellExceptTarget(
-              callIfInRange,
-              grid,
-              neighbourCellIndex,
-              cells[j]
-            );
+            const cellIndex =
+              from3to1D(nx, ny, nz, gridSize, gridSize) *
+              gridMaxParticlesPerCell;
+
+            for (
+              let i = cellIndex;
+              i < cellIndex + gridMaxParticlesPerCell;
+              i++
+            ) {
+              const neighbourId = hashGrid[i];
+              if (neighbourId === 0 || neighbourId === particleId) {
+                break;
+              }
+
+              const neighbourRowStartIndex = neighbourId * particleRowLength;
+
+              const neighbourPositionX =
+                particleMap[neighbourRowStartIndex + positionXIndex];
+              const neighbourPositionY =
+                particleMap[neighbourRowStartIndex + positionYIndex];
+              const neighbourPositionZ =
+                particleMap[neighbourRowStartIndex + positionZIndex];
+              const neighbourMass =
+                particleMap[neighbourRowStartIndex + massIndex];
+
+              const distance = getDistance(
+                neighbourPositionX,
+                neighbourPositionY,
+                neighbourPositionZ,
+                positionX,
+                positionY,
+                positionZ
+              );
+
+              if (distance <= interactionDistance) {
+                // GAS CONSTRAINT
+                // Gives value between 1000 for distance=0 and 0 for distance=5
+                const repellingValue = Math.max(
+                  0,
+                  1000 * Math.exp(distance * -4.60517)
+                );
+
+                const massRatio = neighbourMass / (neighbourMass + mass);
+
+                const accelerationStrength =
+                  -1 * repellingValue * massRatio * dt;
+                const accelerationX =
+                  ((neighbourPositionX - positionX) / distance) *
+                  accelerationStrength;
+                const accelerationY =
+                  ((neighbourPositionY - positionY) / distance) *
+                  accelerationStrength;
+                const accelerationZ =
+                  ((neighbourPositionZ - positionZ) / distance) *
+                  accelerationStrength;
+                velocityX += accelerationX;
+                velocityY += accelerationY;
+                velocityZ += accelerationZ;
+              }
+            }
           }
         }
       }
+
+      return [velocityX, velocityY, velocityZ];
+    })
+    .setOutput([ParticleLens.getCount(particleMap)])
+    .setConstants({
+      particleRowLength: ParticleLens.length,
+      velocityXIndex: ParticleLens.velocityX,
+      velocityYIndex: ParticleLens.velocityY,
+      velocityZIndex: ParticleLens.velocityZ,
+      positionXIndex: ParticleLens.positionX,
+      positionYIndex: ParticleLens.positionY,
+      positionZIndex: ParticleLens.positionZ,
+      massIndex: ParticleLens.mass,
+      gridSize: grid.size,
+      gridSpacing: grid.spacing,
+      gridMaxParticlesPerCell: grid.maxParticlesPerCell,
+      neighboursDepthToCheck,
+      interactionDistance,
+    });
+};
+
+export const applyGasConstraints = (
+  grid: SpatialGrid,
+  particleMap: Float32Array,
+  kernel: IKernelRunShortcut,
+  dt: number
+) => {
+  (kernel(particleMap, grid.cells, dt) as [number, number, number][]).map(
+    ([vx, vy, vz], index) => {
+      ParticleLens.setVelocityX(index, particleMap, vx);
+      ParticleLens.setVelocityY(index, particleMap, vy);
+      ParticleLens.setVelocityZ(index, particleMap, vz);
     }
-  }
+  );
 };
