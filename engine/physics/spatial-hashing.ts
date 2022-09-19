@@ -1,4 +1,3 @@
-import { getDistance } from "../math/vector3";
 import { ParticleLens } from "./particle-lens";
 import { GPU, IKernelRunShortcut, Input } from "gpu.js";
 
@@ -89,9 +88,6 @@ export const resetGrid = (grid: SpatialGrid) => {
   grid.cells.fill(0);
 };
 
-const nodePosition = { x: 0, y: 0, z: 0 };
-const neighbourPosition = { x: 0, y: 0, z: 0 };
-
 export const getKernel = (
   particleMap: Float32Array,
   grid: SpatialGrid,
@@ -157,6 +153,7 @@ export const getKernel = (
       const positionYIndex = this.constants.positionYIndex as number;
       const positionZIndex = this.constants.positionZIndex as number;
       const massIndex = this.constants.massIndex as number;
+      const particleTypeIndex = this.constants.particleTypeIndex as number;
       const gridSize = this.constants.gridSize as number;
       const gridSpacing = this.constants.gridSpacing as number;
       const gridMaxParticlesPerCell = this.constants
@@ -174,6 +171,7 @@ export const getKernel = (
       let velocityY = particleMap[rowStartIndex + velocityYIndex];
       let velocityZ = particleMap[rowStartIndex + velocityZIndex];
       const mass = particleMap[rowStartIndex + massIndex];
+      const particleType = particleMap[rowStartIndex + particleTypeIndex];
 
       const gridCellStartIndex = positionToGridIndex(
         positionX,
@@ -240,12 +238,21 @@ export const getKernel = (
               );
 
               if (distance <= interactionDistance) {
-                // GAS CONSTRAINT
-                // Gives value between 1000 for distance=0 and 0 for distance=5
-                const repellingValue = Math.max(
-                  0,
-                  1000 * Math.exp(distance * -4.60517)
-                );
+                let repellingValue = 0;
+
+                if (particleType === 0) {
+                  // GAS CONSTRAINT
+                  // Gives value between 1000 for distance=0 and 0 for distance=5
+                  repellingValue = Math.max(
+                    0,
+                    1000 * Math.exp(distance * -4.60517)
+                  );
+                } else {
+                  // LIQUID CONSTRAINT
+                  if (distance >= 0 && distance < 4) {
+                    repellingValue = 10 - 5 * distance;
+                  }
+                }
 
                 const massRatio = neighbourMass / (neighbourMass + mass);
 
@@ -280,6 +287,7 @@ export const getKernel = (
       positionXIndex: ParticleLens.positionX,
       positionYIndex: ParticleLens.positionY,
       positionZIndex: ParticleLens.positionZ,
+      particleTypeIndex: ParticleLens.type,
       massIndex: ParticleLens.mass,
       gridSize: grid.size,
       gridSpacing: grid.spacing,
