@@ -224,9 +224,11 @@ export const getKernel = (
           particleMap[rowStartIndex + positionYIndex],
           particleMap[rowStartIndex + positionZIndex],
         ];
-        let velocityX = particleMap[rowStartIndex + velocityXIndex];
-        let velocityY = particleMap[rowStartIndex + velocityYIndex];
-        let velocityZ = particleMap[rowStartIndex + velocityZIndex];
+        const velocity: [number, number, number] = [
+          particleMap[rowStartIndex + velocityXIndex],
+          particleMap[rowStartIndex + velocityYIndex],
+          particleMap[rowStartIndex + velocityZIndex],
+        ];
         const mass = particleMap[rowStartIndex + massIndex];
         const particleType = particleMap[rowStartIndex + particleTypeIndex];
 
@@ -324,9 +326,9 @@ export const getKernel = (
                   const accelerationZ =
                     ((neighbourPositionZ - position[2]) / distance) *
                     accelerationStrength;
-                  velocityX += accelerationX;
-                  velocityY += accelerationY;
-                  velocityZ += accelerationZ;
+                  velocity[0] += accelerationX;
+                  velocity[1] += accelerationY;
+                  velocity[2] += accelerationZ;
                 }
               }
             }
@@ -337,11 +339,7 @@ export const getKernel = (
           position,
           applyWorldConstraint(
             position,
-            applyAcceleration(
-              [velocityX, velocityY, velocityZ],
-              [0, -9.8, 0],
-              dt
-            ),
+            applyAcceleration(velocity, [0, -9.8, 0], dt),
             worldSize
           ),
           dt
