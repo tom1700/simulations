@@ -164,7 +164,7 @@ export const getKernel = (
     velocity: [number, number, number],
     acceleration: [number, number, number],
     dt: number
-  ) {
+  ): [number, number, number] {
     return [
       velocity[0] + acceleration[0] * dt,
       velocity[1] + acceleration[1] * dt,
@@ -176,7 +176,7 @@ export const getKernel = (
     position: [number, number, number],
     velocity: [number, number, number],
     dt: number
-  ) {
+  ): [number, number, number] {
     return [
       position[0] + velocity[0] * dt,
       position[1] + velocity[1] * dt,
@@ -193,7 +193,7 @@ export const getKernel = (
 
   const kernel = gpu
     .createKernelMap(
-      [applyWorldConstraint, applyVelocity],
+      [applyWorldConstraint],
       function (particleMap: number[], hashGrid: number[], dt: number) {
         if (this.thread.x === 0) return [0.0, 0.0, 0.0];
 
@@ -219,9 +219,11 @@ export const getKernel = (
 
         const rowStartIndex = this.thread.x * particleRowLength;
 
-        const positionX = particleMap[rowStartIndex + positionXIndex];
-        const positionY = particleMap[rowStartIndex + positionYIndex];
-        const positionZ = particleMap[rowStartIndex + positionZIndex];
+        const position: [number, number, number] = [
+          particleMap[rowStartIndex + positionXIndex],
+          particleMap[rowStartIndex + positionYIndex],
+          particleMap[rowStartIndex + positionZIndex],
+        ];
         let velocityX = particleMap[rowStartIndex + velocityXIndex];
         let velocityY = particleMap[rowStartIndex + velocityYIndex];
         let velocityZ = particleMap[rowStartIndex + velocityZIndex];
@@ -229,9 +231,9 @@ export const getKernel = (
         const particleType = particleMap[rowStartIndex + particleTypeIndex];
 
         const gridCellStartIndex = positionToGridIndex(
-          positionX,
-          positionY,
-          positionZ,
+          position[0],
+          position[1],
+          position[2],
           gridSize,
           gridSpacing,
           gridMaxParticlesPerCell
@@ -287,9 +289,9 @@ export const getKernel = (
                   neighbourPositionX,
                   neighbourPositionY,
                   neighbourPositionZ,
-                  positionX,
-                  positionY,
-                  positionZ
+                  position[0],
+                  position[1],
+                  position[2]
                 );
 
                 if (distance <= interactionDistance) {
@@ -314,13 +316,13 @@ export const getKernel = (
                   const accelerationStrength =
                     -1 * repellingValue * massRatio * dt;
                   const accelerationX =
-                    ((neighbourPositionX - positionX) / distance) *
+                    ((neighbourPositionX - position[0]) / distance) *
                     accelerationStrength;
                   const accelerationY =
-                    ((neighbourPositionY - positionY) / distance) *
+                    ((neighbourPositionY - position[1]) / distance) *
                     accelerationStrength;
                   const accelerationZ =
-                    ((neighbourPositionZ - positionZ) / distance) *
+                    ((neighbourPositionZ - position[2]) / distance) *
                     accelerationStrength;
                   velocityX += accelerationX;
                   velocityY += accelerationY;
@@ -332,9 +334,9 @@ export const getKernel = (
         }
 
         return applyVelocity(
-          [positionX, positionY, positionZ],
+          position,
           applyWorldConstraint(
-            [positionX, positionY, positionZ],
+            position,
             applyAcceleration(
               [velocityX, velocityY, velocityZ],
               [0, -9.8, 0],
@@ -374,7 +376,11 @@ export const updateParticles = (
   kernel: IKernelMapRunShortcut<any>,
   dt: number
 ) => {
-  const { 0: velocities, 1: positions } = kernel(particleMap, grid.cells, dt);
+  const { 0: velocities, result: positions } = kernel(
+    particleMap,
+    grid.cells,
+    dt
+  );
 
   ParticleLens.forEachParticle((particleId) => {
     ParticleLens.setPositionX(
