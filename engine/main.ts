@@ -15,7 +15,8 @@ export const runSimulation = (
     particleMap,
     grid,
     Math.ceil(GAS_INTERACTION_DISTANCE / grid.spacing),
-    GAS_INTERACTION_DISTANCE
+    GAS_INTERACTION_DISTANCE,
+    worldSize
   );
 
   const step = () => {

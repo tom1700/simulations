@@ -92,7 +92,8 @@ export const getKernel = (
   particleMap: Float32Array,
   grid: SpatialGrid,
   neighboursDepthToCheck: number,
-  interactionDistance: number
+  interactionDistance: number,
+  worldSize: number
 ) => {
   function from3to1D(
     x: number,
@@ -161,6 +162,7 @@ export const getKernel = (
       const neighboursDepthToCheck = this.constants
         .neighboursDepthToCheck as number;
       const interactionDistance = this.constants.interactionDistance as number;
+      const worldSize = this.constants.worldSize as number;
 
       const rowStartIndex = this.thread.x * particleRowLength;
 
@@ -276,6 +278,25 @@ export const getKernel = (
         }
       }
 
+      if (
+        (positionX < 0 && velocityX < 0) ||
+        (positionX > worldSize && velocityX > 0)
+      ) {
+        velocityX *= -0.9;
+      }
+      if (
+        (positionY < 0 && velocityY < 0) ||
+        (positionY > worldSize && velocityY > 0)
+      ) {
+        velocityY *= -0.9;
+      }
+      if (
+        (positionZ < 0 && velocityZ < 0) ||
+        (positionZ > worldSize && velocityZ > 0)
+      ) {
+        velocityZ *= -0.9;
+      }
+
       return [velocityX, velocityY, velocityZ];
     })
     .setOutput([ParticleLens.getCount(particleMap)])
@@ -294,10 +315,11 @@ export const getKernel = (
       gridMaxParticlesPerCell: grid.maxParticlesPerCell,
       neighboursDepthToCheck,
       interactionDistance,
+      worldSize,
     });
 };
 
-export const applyGasConstraints = (
+export const applyConstraints = (
   grid: SpatialGrid,
   particleMap: Float32Array,
   kernel: IKernelRunShortcut,

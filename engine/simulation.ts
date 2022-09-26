@@ -1,10 +1,8 @@
-import { gasConstraintSingleV2 } from "./constraints/gas";
 import { worldConstraintV2 } from "./constraints/world";
 import { Vector3 } from "./interfaces/vector3";
 import {
   addParticle,
-  applyGasConstraints,
-  forEachParticleNeighbourWithinRange,
+  applyConstraints,
   resetGrid,
   SpatialGrid,
 } from "./physics/spatial-hashing";
@@ -36,12 +34,11 @@ export const runSimulationStep = (
     addParticle(spatialGrid, x, y, z, id);
   }, particleMap);
 
-  applyGasConstraints(spatialGrid, particleMap, kernel, dt);
+  applyConstraints(spatialGrid, particleMap, kernel, dt);
 
   ParticleLens.forEachParticle((id) => {
     applyAccelerationV2(id, particleMap, gravity, dt);
 
-    worldConstraintV2(id, particleMap, worldSize);
     applyVelocityV2(id, particleMap, dt);
   }, particleMap);
 
