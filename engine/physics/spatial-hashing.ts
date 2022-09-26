@@ -133,36 +133,67 @@ export const getKernel = (
     );
   }
 
+  function applyWorldConstraint(
+    position: [number, number, number],
+    velocity: [number, number, number],
+    worldSize: number
+  ) {
+    if (
+      (position[0] < 0 && velocity[0] < 0) ||
+      (position[0] > worldSize && velocity[0] > 0)
+    ) {
+      velocity[0] *= -0.9;
+    }
+    if (
+      (position[1] < 0 && velocity[1] < 0) ||
+      (position[1] > worldSize && velocity[1] > 0)
+    ) {
+      velocity[1] *= -0.9;
+    }
+    if (
+      (position[2] < 0 && velocity[2] < 0) ||
+      (position[2] > worldSize && velocity[2] > 0)
+    ) {
+      velocity[2] *= -0.9;
+    }
+
+    return velocity;
+  }
+
+  function applyAcceleration(
+    velocity: [number, number, number],
+    acceleration: [number, number, number],
+    dt: number
+  ) {
+    return [
+      velocity[0] + acceleration[0] * dt,
+      velocity[1] + acceleration[1] * dt,
+      velocity[2] + acceleration[2] * dt,
+    ];
+  }
+
+  function applyVelocity(
+    position: [number, number, number],
+    velocity: [number, number, number],
+    dt: number
+  ) {
+    return [
+      position[0] + velocity[0] * dt,
+      position[1] + velocity[1] * dt,
+      position[2] + velocity[2] * dt,
+    ];
+  }
+
   gpu.addFunction(from3to1D);
   gpu.addFunction(positionToGridIndex);
   gpu.addFunction(getDistance);
+  gpu.addFunction(applyWorldConstraint);
+  gpu.addFunction(applyAcceleration);
+  gpu.addFunction(applyVelocity);
 
   const kernel = gpu
     .createKernelMap(
-      [
-        function applyAcceleration(
-          velocity: [number, number, number],
-          acceleration: [number, number, number],
-          dt: number
-        ) {
-          return [
-            velocity[0] + acceleration[0] * dt,
-            velocity[1] + acceleration[1] * dt,
-            velocity[2] + acceleration[2] * dt,
-          ];
-        },
-        function applyVelocity(
-          position: [number, number, number],
-          velocity: [number, number, number],
-          dt: number
-        ) {
-          return [
-            position[0] + velocity[0] * dt,
-            position[1] + velocity[1] * dt,
-            position[2] + velocity[2] * dt,
-          ];
-        },
-      ],
+      [applyWorldConstraint, applyVelocity],
       function (particleMap: number[], hashGrid: number[], dt: number) {
         if (this.thread.x === 0) return [0.0, 0.0, 0.0];
 
@@ -300,31 +331,16 @@ export const getKernel = (
           }
         }
 
-        if (
-          (positionX < 0 && velocityX < 0) ||
-          (positionX > worldSize && velocityX > 0)
-        ) {
-          velocityX *= -0.9;
-        }
-        if (
-          (positionY < 0 && velocityY < 0) ||
-          (positionY > worldSize && velocityY > 0)
-        ) {
-          velocityY *= -0.9;
-        }
-        if (
-          (positionZ < 0 && velocityZ < 0) ||
-          (positionZ > worldSize && velocityZ > 0)
-        ) {
-          velocityZ *= -0.9;
-        }
-
         return applyVelocity(
           [positionX, positionY, positionZ],
-          applyAcceleration(
-            [velocityX, velocityY, velocityZ],
-            [0, -9.8, 0],
-            dt
+          applyWorldConstraint(
+            [positionX, positionY, positionZ],
+            applyAcceleration(
+              [velocityX, velocityY, velocityZ],
+              [0, -9.8, 0],
+              dt
+            ),
+            worldSize
           ),
           dt
         );
